@@ -23,7 +23,8 @@ end
 
 function handle_message(demux::DemuxLogger, level, message, _module, group, id, file, line; kwargs...)
 	for logger in demux.loggers
-		if shouldlog(logger,  level, _module, group, id)
+        if min_enabled_level(logger)<= level &&  shouldlog(logger,  level, _module, group, id)
+            # we bypassed those checks above, so we got to check them for each
 			handle_message(logger, level, message, _module, group, id, file, line; kwargs...)
 		end
 	end

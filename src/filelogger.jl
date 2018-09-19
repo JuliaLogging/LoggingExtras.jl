@@ -7,9 +7,9 @@ struct FileLogger <: AbstractLogger
     always_flush::Bool
 end
 
-function FileLogger(path, level=Info; append=false, always_flush=true)
+function FileLogger(path::AbstractString; min_level=Info, append=false, always_flush=true)
     filehandle = open(path, append ? "a" : "w")
-    FileLogger(SimpleLogger(filehandle, level), always_flush)
+    FileLogger(SimpleLogger(filehandle, min_level), always_flush)
 end
 
 

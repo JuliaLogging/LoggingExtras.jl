@@ -10,7 +10,7 @@ at the cost of a bit of overhead.
 The `filter` should be a function that returns a boolean.
 `true` if the message should be logged and `false` if not.
 It should take as inputs:
-`level, message, _module, group, id, file, line; kwargs...)`
+`(level, message, _module, group, id, file, line; kwargs...)`
 
 These argument come from the logging macro (@info`, `@warn` etc).
   
@@ -27,14 +27,14 @@ These argument come from the logging macro (@info`, `@warn` etc).
     source location of a log message.
   * `kwargs...` any keyword or positional arguments to the logging macro.
 """
-struct FilteredLogger{T,F} <: AbstractLogger where T<: AbstractLogger
+struct FilteredLogger{T <: AbstractLogger, F} <: AbstractLogger
 	filter::F
-	logger::SimpleLogger
+	logger::T
 end
 
 
 function handle_message(filteredlogger::FilteredLogger, level, message, _module, group, id, file, line; kwargs...)
-	if filteredlogger.filter(filteredlogger.logger, level, message, _module, group, id, file, line; kwargs...)
+	if filteredlogger.filter(level, message, _module, group, id, file, line; kwargs...)
 		handle_message(filteredlogger.logger, level, message, _module, group, id, file, line; kwargs...)
 	end
 end
