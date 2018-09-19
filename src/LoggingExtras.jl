@@ -1,12 +1,15 @@
 module LoggingExtras
 
 using Base.CoreLogging:
-    LogLevel, BelowMinLevel, Debug, Info, Warn, Error, AboveMaxLevel,
+    global_logger,
+    LogLevel, BelowMinLevel, Debug, Info, Warn, Error, AboveMaxLevel
 
 import Base.CoreLogging:
     AbstractLogger, SimpleLogger,
-	handle_message, shouldlog, min_enabled_level, catch_exceptions,
+	handle_message, shouldlog, min_enabled_level, catch_exceptions
 
+export demux_global_logger,
+    DemuxLogger, FilterLogger, FileLogger
 
 include("demuxlogger.jl")
 include("filteredlogger.jl")

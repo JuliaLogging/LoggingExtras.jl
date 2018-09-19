@@ -2,23 +2,26 @@ struct DemuxLogger <: AbstractLogger
 	loggers::Vector{AbstractLogger}
 end
 
+
+
 """
-	demux_global_logger!(loggers...; include_current=true)
+    DemuxLogger(loggers...; include_current=true)
 
 Sets the global_logger to demux,
 so that messages are sent to all the loggers.
-If `include_current` is true, then messages are also sent to the old global logger.
+If `include_current_global` is true, then messages are also sent to the global logger
+(or rather to what was the global logger when this was constructed).
 Normally this would be the ConsoleLogger in the REPL etc.
 """
-function demux_global_logger!(loggers...; include_current=true)
-	loggers = collect(loggers)
-	if include_current
+function DemuxLogger(loggers::Vararg{AbstractLogger}; include_current_global=true)
+    loggers = Vector{AbstractLogger}(collect(loggers))
+	if include_current_global
 		push!(loggers, global_logger())
 	end
-	global_logger(DemuxLogger(loggers))
+	DemuxLogger(loggers)
 end
 
-function handle_message(demux::demux, level, message, _module, group, id, file, line; kwargs...)
+function handle_message(demux::DemuxLogger, level, message, _module, group, id, file, line; kwargs...)
 	for logger in demux.loggers
 		if shouldlog(logger,  level, _module, group, id)
 			handle_message(logger, level, message, _module, group, id, file, line; kwargs...)
@@ -26,14 +29,14 @@ function handle_message(demux::demux, level, message, _module, group, id, file, 
 	end
 end
 
-function shouldlog(demux::demux, level, _module, group, id)
+function shouldlog(demux::DemuxLogger, level, _module, group, id)
 	any(shouldlog(logger, level, _module, group, id) for logger in demux.loggers)
 end
 
-function min_enabled_level(demux::demux)
+function min_enabled_level(demux::DemuxLogger)
 	minimum(min_enabled_level(logger) for logger in demux.loggers)
 end
 
-function catch_exceptions(demux::demux)
+function catch_exceptions(demux::DemuxLogger)
 	any(catch_exceptions(logger) for logger in demux.loggers)
 end
