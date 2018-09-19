@@ -34,6 +34,20 @@ logger = global_logger()
 
 # Loggers introduced by this package:
 
+
+This package introduces 3 new loggers.
+The `DemuxLogger`, the `FilteredLogger` and the `FileLogger`.
+All of them just wrap existing loggers.
+The `DemuxLogger` sends the logs to multiple different loggers.
+The `FilteredLogger` lets you add rules to cause a logger to ignore some inputs.
+
+
+By combining `DemuxLogger` with `FilteredLogger`s you can arbitrarily route log messages, wherever you want.
+
+The `FileLogger` is just a convience wrapper around the base julia `SimpleLogger`,
+to make it easier to pass in a filename, rather than a stream.
+
+
 ## `DemuxLogger` and `FileLogger`
 
 The `DemuxLogger` sends the log messages to multiple places.
