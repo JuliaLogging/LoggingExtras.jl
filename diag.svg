@@ -56,7 +56,7 @@
        orient="auto">
       <path
          transform="matrix(-0.2,0,0,-0.2,-1.2,0)"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1"
+         style="fill:#000000;fill-opacity:0;fill-rule:evenodd;stroke:#d40000;stroke-width:1pt;stroke-opacity:1"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          id="path5548" />
     </marker>
@@ -261,7 +261,7 @@
       <path
          id="path6734-6-8-5-6-60-6"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
-         style="fill:#64ab57;fill-opacity:0.97647059;fill-rule:evenodd;stroke:#a879bf;stroke-width:1pt;stroke-opacity:1"
+         style="fill:#a879bf;fill-opacity:1;fill-rule:evenodd;stroke:#a879bf;stroke-width:1pt;stroke-opacity:1"
          transform="matrix(-0.2,0,0,-0.2,-1.2,0)" />
     </marker>
     <marker
@@ -273,7 +273,7 @@
       <path
          id="path6734-6-8-5-6-8"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
-         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1pt;stroke-opacity:1"
+         style="fill:#2a7fff;fill-opacity:1;fill-rule:evenodd;stroke:#2a7fff;stroke-width:1pt;stroke-opacity:1"
          transform="matrix(-0.2,0,0,-0.2,-1.2,0)" />
     </marker>
   </defs>
@@ -525,7 +525,7 @@
     <path
        id="path6724-93-9-3-6-0-2"
        d="m 1002.5622,890.75766 c 52.8655,-7.3709 44.661,13.49391 101.5797,24.18555"
-       style="fill:#64ab57;fill-opacity:0.97647059;fill-rule:evenodd;stroke:#a879bf;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker6732-5-4-5-0-1-6)" />
+       style="fill:none;fill-opacity:0.97647059;fill-rule:evenodd;stroke:#a879bf;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker6732-5-4-5-0-1-6)" />
     <path
        id="path6724-93-9-3-6-1"
        d="m 576.08878,728.11305 c 52.86564,7.3709 -19.02769,-3.01346 34.66611,1.61247"
