@@ -306,7 +306,7 @@
          style="fill:#ff6600"
          id="flowPara4148">@<flowSpan
    id="flowSpan4370"
-   style="font-size:50px">warn</flowSpan></flowPara></flowRoot>    <text
+   style="font-size:30px">warn</flowSpan></flowPara></flowRoot>    <text
        id="text4152"
        y="648.46503"
        x="147.61021"
@@ -314,6 +314,7 @@
        xml:space="preserve"><tspan
          y="648.46503"
          x="147.61021"
+                                   style="fill:#ff6600"
          id="tspan4154">@<tspan
    id="tspan4368"
    style="font-size:30px">error</tspan></tspan></text>
