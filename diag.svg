@@ -294,7 +294,7 @@
      id="layer1">
     <flowRoot
        transform="translate(-41.377619,397.84456)"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:27.5px;line-height:177.99999714%;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Semi-Bold';text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:27.5px;line-height:177.99999714%;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI, Semi-Bold';text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#ff6600;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        id="flowRoot4136"
        xml:space="preserve"><flowRegion
          id="flowRegion4138"><rect
@@ -314,7 +314,6 @@
        xml:space="preserve"><tspan
          y="648.46503"
          x="147.61021"
-                                   style="fill:#ff6600"
          id="tspan4154">@<tspan
    id="tspan4368"
    style="font-size:30px">error</tspan></tspan></text>
