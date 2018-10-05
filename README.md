@@ -130,3 +130,35 @@ julia> with_logger(filtered_logger) do
 [ Info: Yo Dawg! it is all good
 ```
 
+
+
+# Examples
+
+## Filter out any overly long messages
+
+```
+using LoggingExtras
+using Logging
+
+function sensible_message_filter(level, message, _module, group, id, file, line; kwargs...)
+	length(message) < 1028
+end
+
+global_logger(FilteredLogger(sensible_message_filter, global_logger()))
+```
+
+
+## Filterout any messages from HTTP
+
+```
+using LoggingExtras
+using Logging
+using HTTP
+
+function not_HTTP_message_filter(level, message, _module, group, id, file, line; kwargs...)
+	_module != HTTP
+end
+
+global_logger(FilteredLogger(not_HTTP_message_filter, global_logger()))
+```
+
