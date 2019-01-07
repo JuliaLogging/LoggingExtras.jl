@@ -1,6 +1,6 @@
 
 struct DowngradingLogger{T <: AbstractLogger, L} <: AbstractLogger
-	logger::T
+  logger::T
   dest_level::L
 end
 
