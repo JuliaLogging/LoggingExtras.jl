@@ -1,0 +1,15 @@
+
+struct DowngradingLogger{T <: AbstractLogger, L} <: AbstractLogger
+	logger::T
+  dest_level::L
+end
+
+
+function handle_message(downgradelogger::DowngradingLogger, level, message, _module, group, id, file, line; kwargs...)
+  level = min(level, downgradelogger.dest_level)
+  handle_message(filteredlogger.logger, level, message, _module, group, id, file, line; kwargs...)
+end
+
+shouldlog(filteredlogger::DowngradingLogger, level, _module, group, id) = shouldlog(filteredlogger.logger, level, _module, group, id)
+min_enabled_level(filteredlogger::DowngradingLogger) = min_enabled_level(filteredlogger.logger)
+catch_exceptions(filteredlogger::DowngradingLogger) = catch_exceptions(filteredlogger.logger)
