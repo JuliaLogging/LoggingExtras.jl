@@ -17,7 +17,7 @@ The `filter` should be a function that returns a boolean.
 `true` if the message should be logged and `false` if not.
 As input it will be given a named tuple with the following fields:
 `(level, message, _module, group, id, file, line, kwargs)`
-See `?LoggingExtra.HandleMessageArgs` for more information on what each is.
+See `?LoggingExtra.handle_message_ags` for more information on what each is.
 """
 struct ActiveFilteredLogger{T <: AbstractLogger, F} <: AbstractLogger
 	filter::F
@@ -26,25 +26,25 @@ end
 
 
 function handle_message(logger::ActiveFilteredLogger, args...; kwargs...)
-    log_args = HandleMessageArgs(args...; kwargs...)
-    if logger.filter(log_args)
-		handle_message(logger.logger, args...; kwargs...)
-	end
+    log_args = handle_message_args(args...; kwargs...)
+    if comp_handle_message_check(logger.logger, args...; kwargs...)
+        if logger.filter(log_args)
+		    handle_message(logger.logger, args...; kwargs...)
+	    end
+    end
 end
 
-# As an optimisation, we query if the logger we are sending this to will accept
-# this log. If not then there is no point in us taking it
 function shouldlog(logger::ActiveFilteredLogger, args...)
-    return shouldlog(logger.logger, args...)
+    return comp_shouldlog(logger.logger, args...)
 end
 
 min_enabled_level(logger::ActiveFilteredLogger) = min_enabled_level(logger.logger)
 catch_exceptions(logger::ActiveFilteredLogger) = catch_exceptions(logger.logger)
 
 """
-    HandleMessageArgs
+    handle_message_args
 
-This is an alias for a NamedTuple containing all the arguments the logger gives
+This creates NamedTuple containing all the arguments the logger gives
 to `handle_message`
 It is the type pased to the active logger filter.
 These argument come from the logging macro (@info`, `@warn` etc).
@@ -62,7 +62,7 @@ These argument come from the logging macro (@info`, `@warn` etc).
     source location of a log message.
   * `kwargs...`: Any  keyword or position arguments passed to the logging macro
 """
-function HandleMessageArgs(args...; kwargs...)
+function handle_message_args(args...; kwargs...)
     fieldnames = (:level, :message, :_module, :group, :id, :file, :line, :kwargs)
     fieldvals = (args..., kwargs)
     return NamedTuple{fieldnames, typeof(fieldvals)}(fieldvals)

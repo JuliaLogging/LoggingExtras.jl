@@ -21,17 +21,16 @@ function DemuxLogger(loggers::Vararg{AbstractLogger}; include_current_global=tru
 	DemuxLogger(loggers)
 end
 
-function handle_message(demux::DemuxLogger, level, message, _module, group, id, file, line; kwargs...)
+function handle_message(demux::DemuxLogger, args...; kwargs...)
 	for logger in demux.loggers
-        if min_enabled_level(logger)<= level &&  shouldlog(logger,  level, _module, group, id)
-            # we bypassed those checks above, so we got to check them for each
-			handle_message(logger, level, message, _module, group, id, file, line; kwargs...)
+        if comp_handle_message_check(logger, args...; kwargs...)
+			handle_message(logger, args...; kwargs...)
 		end
 	end
 end
 
-function shouldlog(demux::DemuxLogger, level, _module, group, id)
-	any(shouldlog(logger, level, _module, group, id) for logger in demux.loggers)
+function shouldlog(demux::DemuxLogger, args...)
+	any(comp_shouldlog(logger, args...) for logger in demux.loggers)
 end
 
 function min_enabled_level(demux::DemuxLogger)

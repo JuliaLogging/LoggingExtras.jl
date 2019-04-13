@@ -52,3 +52,35 @@ end
     end
     @test length(testlogger.logs) == 2
 end
+
+@testset "Early Filter" begin
+    testlogger = TestLogger()
+    filtered_logger = EarlyFilteredLogger(testlogger) do logargs
+        logargs.level == Info  # Only exactly Info, nothing more nothing less
+    end
+    
+    with_logger(filtered_logger) do
+        @info "info1"
+        @warn "Yo Dawg! It is a warning"
+        @info "info2"
+        @info "Yo Dawg! It's all good"
+    end
+    @test length(testlogger.logs) == 3
+end
+
+@testset "MinLevel Filter" begin
+    testlogger = TestLogger()
+    filtered_logger = MinLevelLogger(testlogger, Warn)
+    
+    with_logger(filtered_logger) do
+        @info "info1"
+        @warn "Yo Dawg! It is a warning"
+        @info "info2"
+        @info "Yo Dawg! It's all good"
+        @info "info 3"
+        @error "MISTAKES WERE MADE"
+    end
+    @test length(testlogger.logs) == 2
+end
+
+

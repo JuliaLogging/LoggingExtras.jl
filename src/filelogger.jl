@@ -1,7 +1,3 @@
-# TODO: Maybe this should just be a function
-# It is a super thing wrapper around a SimpleLogger
-
-
 struct FileLogger <: AbstractLogger
 	logger::SimpleLogger
     always_flush::Bool

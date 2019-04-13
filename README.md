@@ -36,14 +36,18 @@ logger = global_logger()
 # Loggers introduced by this package:
 
 
-This package introduces 3 new loggers.
-The `DemuxLogger`, the `FilteredLogger` and the `FileLogger`.
+This package introduces 5 new loggers.
+The `DemuxLogger`, the `FileLogger`, and 3 types of filtered logger.
 All of them just wrap existing loggers.
-The `DemuxLogger` sends the logs to multiple different loggers.
-The `FilteredLogger` lets you add rules to cause a logger to ignore some inputs.
+ - The `DemuxLogger` sends the logs to multiple different loggers.
+ - The `FileLogger` is a simple logger sink that writes to file.
+ - The 3 filter loggers are used to control if a message is written or not
+     - The `MinLevelLogger` only allowes messages to pass that are above a given level of severity
+     - The `EarlyFilteredLogger` lets you write filter rules based on the `level`, `module`, `group` and `id` of the log message
+     - The `ActiveFilteredLogger` lets you filter based on the full content
 
 
-By combining `DemuxLogger` with `FilteredLogger`s you can arbitrarily route log messages, wherever you want.
+By combining `DemuxLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
 The `FileLogger` is just a convience wrapper around the base julia `SimpleLogger`,
 to make it easier to pass in a filename, rather than a stream.
@@ -56,13 +60,13 @@ It takes a list of loggers.
 It also has the keyword argument `include_current_global`,
 to determine if you also want to log to the global logger.
 
-It is up to those loggers to determine if they will accept it.\
+It is up to those loggers to determine if they will accept it.
 Which they do using their methods for `shouldlog` and `min_enabled_level`.
-Or you can do, by wrapping them in a `FilteredLogger` as discussed below.
+Or you can do, by wrapping them in a filtered logger  as discussed below.
 
 The `FileLogger` does logging to file.
 It is really simple.
-It takes a filename; and the minimum level it should log.
+It takes a filename.
 
 ### Demo
 We are going to log info and above to one file,
@@ -72,8 +76,8 @@ and warnings and above to another.
 julia> using Logging; using LoggingExtras;
 
 julia> demux_logger = DemuxLogger(
-		FileLogger("info.log", min_level=Logging.Info),
-		FileLogger("warn.log", min_level=Logging.Warn),
+		MinLevelLogger(FileLogger("info.log"), Logging.Info),
+		MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
 		include_current_global=false
 		);
 
