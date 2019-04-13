@@ -20,6 +20,25 @@ using Test: collect_test_logs, TestLogger
 
 end
 
+
+@testset "File" begin
+    mktempdir() do dir
+        filepath = joinpath(dir, "log")
+        with_logger(FileLogger(filepath)) do
+            @info "first"
+            @warn "second"
+            @info "third"
+        end
+        logtext = String(read(filepath))
+        @test occursin("first", logtext)
+        @test occursin("second", logtext)
+        @test occursin("third", logtext)
+    end
+end
+
+
+
+# Deprecated
 @testset "Filter" begin
     testlogger = TestLogger()
     yodawg_filter(lvl, msg, args...; kwargs...) = startswith(msg, "Yo Dawg!")
@@ -36,18 +55,3 @@ end
 
 end
 
-
-@testset "File" begin
-    mktempdir() do dir
-        filepath = joinpath(dir, "log")
-        with_logger(FileLogger(filepath)) do
-            @info "first"
-            @warn "second"
-            @info "third"
-        end
-        logtext = String(read(filepath))
-        @test occursin("first", logtext)
-        @test occursin("second", logtext)
-        @test occursin("third", logtext)
-    end
-end

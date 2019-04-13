@@ -15,4 +15,6 @@ include("demuxlogger.jl")
 include("filteredlogger.jl")
 include("filelogger.jl")
 
+include("deprecated.jl")
+
 end # module
