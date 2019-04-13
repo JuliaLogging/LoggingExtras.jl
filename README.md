@@ -148,6 +148,44 @@ The filter function for early filter logging only has access to the
 The most notable use of it is to filter based on modules,
 see the HTTP example below.
 
+Another example is using them to stop messages every being repeated within a given time period.
+
+```
+using Dates, Logging, LoggingExtras
+
+julia> function make_throttled_logger(period)
+         history = Dict{Symbol, DateTime}()
+         # We are going to use a closure
+         EarlyFilteredLogger(global_logger()) do log
+           if !haskey(history, log.id) || (period < now() - history[log.id])
+             # then we will log it, and update record of when we did
+             history[log.id] = now()
+             return true
+           else
+             return false
+           end
+         end
+       end
+make_throttled_logger (generic function with 1 method)
+
+julia> throttled_logger = make_throttled_logger(Second(3));
+
+julia> with_logger(throttled_logger) do
+         for ii in 1:10
+           sleep(1)
+           @info "It happen" ii
+         end
+       end
+┌ Info: It happen
+└   ii = 1
+┌ Info: It happen
+└   ii = 4
+┌ Info: It happen
+└   ii = 7
+┌ Info: It happen
+└   ii = 10
+```
+
 ## `MinLevelLogger`
 This is basically a special case of the early filtered logger,
 that just checks if the level of the message is above the level specified when it was created.
