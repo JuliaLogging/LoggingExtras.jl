@@ -37,21 +37,18 @@ end
 end
 
 
-
-# Deprecated
-@testset "Filter" begin
+@testset "Active Filter" begin
     testlogger = TestLogger()
-    yodawg_filter(lvl, msg, args...; kwargs...) = startswith(msg, "Yo Dawg!")
+    yodawg_filter(logargs) = startswith(logargs.message, "Yo Dawg!")
 
-    filtered_logger = FilteredLogger(yodawg_filter, testlogger)
+    filtered_logger = ActiveFilteredLogger(yodawg_filter, testlogger)
     
     with_logger(filtered_logger) do
         @info "info1"
         @warn "Yo Dawg! It is a warning"
         @info "info2"
         @info "Yo Dawg! It's all good"
+        @info "info 3"
     end
     @test length(testlogger.logs) == 2
-
 end
-
