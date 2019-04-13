@@ -66,7 +66,9 @@ Or you can do, by wrapping them in a filtered logger  as discussed below.
 
 The `FileLogger` does logging to file.
 It is really simple.
-It takes a filename.
+It takes a filename,
+ - a kwarg to check if should `always_flush` (default: `true`).
+ - a kwarg to `append` rather than overwrite (default `false`. i.e. overwrite by default)
 
 ### Demo
 We are going to log info and above to one file,
@@ -76,18 +78,18 @@ and warnings and above to another.
 julia> using Logging; using LoggingExtras;
 
 julia> demux_logger = DemuxLogger(
-		MinLevelLogger(FileLogger("info.log"), Logging.Info),
-		MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
-		include_current_global=false
-		);
+	MinLevelLogger(FileLogger("info.log"), Logging.Info),
+	MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
+	include_current_global=false
+);
 
 
 julia> with_logger(demux_logger) do
-		@warn("It is bad")
-		@info("normal stuff")
-		@error("THE WORSE THING")
-		@debug("it is chill")
-	end
+	@warn("It is bad")
+	@info("normal stuff")
+	@error("THE WORSE THING")
+	@debug("it is chill")
+end
 
 shell>  cat warn.log
 ┌ Warning: It is bad
@@ -104,39 +106,53 @@ shell>  cat info.log
 └ @ Main REPL[34]:4
 ```
 
-## `FilteredLogger`
+## `ActiveFilteredLogger`
 
-The `FilteredLogger` exists to give more control over which messages should be logged.
+The `ActiveFilteredLogger` exists to give more control over which messages should be logged.
 It warps any logger, and before sending messages to the logger to log,
 checks them against a filter function.
 The filter function takes the full set of parameters of the message.
-(See it's docstring with `?FilteredLogger` for more details.)
+(See it's docstring with `?ActiveFilteredLogger` for more details.)
 
 ### Demo
 We want to filter to only log strings staring with `"Yo Dawg!"`.
 
 ```
-julia> function yodawg_filter(level, message, _module, group, id, file, line; kwargs...)
-		startswith(msg, "Yo Dawg!")
+julia> function yodawg_filter(log_args)
+	startswith(log_args.message, "Yo Dawg!")
 end
  yodawg_filter (generic function with 1 method)                                                                                     
 
-julia> filtered_logger = FilteredLogger(yodawg_filter, global_logger());
+julia> filtered_logger = ActiveFilteredLogger(yodawg_filter, global_logger());
 
 julia> with_logger(filtered_logger) do
-		@info "Boring message"
-		@warn "Yo Dawg! it is bad"
-		@info "Another boring message"
-		@info "Yo Dawg! it is all good"
-	end
+	@info "Boring message"
+	@warn "Yo Dawg! it is bad"
+	@info "Another boring message"
+	@info "Yo Dawg! it is all good"
+end
 ┌ Warning: Yo Dawg! it is bad
 └ @ Main REPL[28]:3
 [ Info: Yo Dawg! it is all good
 ```
 
+## `EarlyFilteredLogger`
 
+The `EarlyFilteredLogger` is similar to the `ActiveFilteredLogger`,
+but it runs earlier in the logging pipeline.
+In particular it runs before the message is computed.
+It is (theoretically) useful to filter things early if creating the log message is expective.
+E.g. if it includes summary statistics of the error.
+The filter function for early filter logging only has access to the 
+`level`, `_module`, `id` and `group` fields of the log message.
+The most notable use of it is to filter based on modules,
+see the HTTP example below.
 
-# Examples
+## `MinLevelLogger`
+This is basically a special case of the early filtered logger,
+that just checks if the level of the message is above the level specified when it was created.
+
+# More Examples
 
 ## Filter out any overly long messages
 
@@ -144,11 +160,11 @@ julia> with_logger(filtered_logger) do
 using LoggingExtras
 using Logging
 
-function sensible_message_filter(level, message, _module, group, id, file, line; kwargs...)
-	length(message) < 1028
+function sensible_message_filter(log)
+	length(log.message) < 1028
 end
 
-global_logger(FilteredLogger(sensible_message_filter, global_logger()))
+global_logger(ActiveFilteredLogger(sensible_message_filter, global_logger()))
 ```
 
 
@@ -159,10 +175,10 @@ using LoggingExtras
 using Logging
 using HTTP
 
-function not_HTTP_message_filter(level, message, _module, group, id, file, line; kwargs...)
-	_module != HTTP
+function not_HTTP_message_filter(log)
+	log._module != HTTP
 end
 
-global_logger(FilteredLogger(not_HTTP_message_filter, global_logger()))
+global_logger(EarlyFilteredLogger(not_HTTP_message_filter, global_logger()))
 ```
 
