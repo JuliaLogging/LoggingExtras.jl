@@ -30,6 +30,11 @@ These argument come from the logging macro (@info`, `@warn` etc).
 struct FilteredLogger{T <: AbstractLogger, F} <: AbstractLogger
 	filter::F
 	logger::T
+    
+    function FilteredLogger{T,F}(filter, logger)
+        Base.depwarn("The filtered loggered type is deprecated, in favour of the ActiveFilteredLogger. FilteredLogger will be removed in the next version", :FilteredLogger)
+        new(filter, logger)
+    end
 end
 
 
