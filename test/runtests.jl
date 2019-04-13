@@ -6,8 +6,6 @@ using Base.CoreLogging: Debug, Info, Warn
 using Test: collect_test_logs, TestLogger
 
 
-
-
 @testset "Demux" begin
     testlogger_info = TestLogger(min_level=Info)
     testlogger_warn = TestLogger(min_level=Warn)
@@ -21,8 +19,6 @@ using Test: collect_test_logs, TestLogger
     @test length(testlogger_warn.logs) == 1
 
 end
-
-
 
 @testset "Filter" begin
     testlogger = TestLogger()
