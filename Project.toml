@@ -1,12 +1,10 @@
-authors = ["Lyndon White <oxinabox@ucc.asn.au>"]
 name = "LoggingExtras"
 uuid = "bda5643c-bbc4-11e8-2bd7-9ffae705afc0"
-version = "0.1.0"
-
-[deps]
+authors = ["Lyndon White <oxinabox@ucc.asn.au>"]
+version = "0.2.0"
 
 [compat]
-julia = "0.7"
+julia = "0.7, 1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
