@@ -9,12 +9,10 @@ import Base.CoreLogging:
 	handle_message, shouldlog, min_enabled_level, catch_exceptions
 
 export demux_global_logger,
-    DemuxLogger, FilteredLogger, FileLogger
+    DemuxLogger, ActiveFilteredLogger, FileLogger
 
 include("demuxlogger.jl")
-include("filteredlogger.jl")
+include("activefiltered.jl")
 include("filelogger.jl")
-
-include("deprecated.jl")
 
 end # module
