@@ -1,7 +1,7 @@
 using LoggingExtras
 using Test
 using Base.CoreLogging
-using Base.CoreLogging: Debug, Info, Warn
+using Base.CoreLogging: Debug, Info, Warn, Error
 
 using Test: collect_test_logs, TestLogger
 
@@ -73,6 +73,29 @@ end
     filtered_logger = MinLevelLogger(testlogger, Warn)
     
     with_logger(filtered_logger) do
+        @info "info1"
+        @warn "Yo Dawg! It is a warning"
+        @info "info2"
+        @info "Yo Dawg! It's all good"
+        @info "info 3"
+        @error "MISTAKES WERE MADE"
+    end
+    @test length(testlogger.logs) == 2
+end
+
+
+@testset "Transformer" begin
+    testlogger = TestLogger(min_level=Error)
+    transformer_logger = TransformerLogger(testlogger) do log_msg
+        # We are going to transform all warnings into errors
+        if log_msg.level == Warn
+            return merge(log_msg, (; level=Error))
+        else
+            return log_msg
+        end
+    end
+    
+    with_logger(transformer_logger) do
         @info "info1"
         @warn "Yo Dawg! It is a warning"
         @info "info2"

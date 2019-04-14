@@ -190,6 +190,43 @@ julia> with_logger(throttled_logger) do
 This is basically a special case of the early filtered logger,
 that just checks if the level of the message is above the level specified when it was created.
 
+## `TransformerLogger`
+The transformer logger allows for the modification of log messages.
+This modification includes such things as its log level, and content,
+and all the other arguments passed to `handle_message`.
+
+When constructing a `TransformerLogger` you pass in a tranformation function,
+and a logger to be wrapped.
+The  transformation function takes a named tuple containing all the log message fields,
+and should return a new modified named tuple.
+
+A simple example of its use is truncating messages.
+
+```
+julia> using Logging, LoggingExtras
+
+julia> truncating_logger  = TransformerLogger(global_logger()) do log
+           if length(log.message) > 128
+               short_message = log.message[1:min(end, 125)] * "..."
+               return merge(log, (;message=short_message))
+           else
+               return log
+           end
+       end;
+
+julia> with_logger(truncating_logger) do
+           @info "the truncating logger only truncates long messages"
+           @info "Like this one that is this is a long and rambling message, it just keeps going and going and going,  and it seems like it will never end."
+           @info "Not like this one, that is is short"
+       end
+[ Info: the truncating logger only truncates long messages
+[ Info: Like this one that is this is a long and rambling message, it just keeps going and going and going,  and it seems like it wil...
+[ Info: Not like this one, that is is short
+```
+
+It can also be used to do things such as change the log level of messages from a particular module (see the example below).
+
+
 # More Examples
 
 ## Filter out any overly long messages
@@ -218,5 +255,25 @@ function not_HTTP_message_filter(log)
 end
 
 global_logger(EarlyFilteredLogger(not_HTTP_message_filter, global_logger()))
+```
+
+## Raising HTTP debug level errors to be Info level
+
+```
+using LoggingExtras
+using Logging
+using HTTP
+
+transformer_logger(global_logger()) do log
+	if log._module == HTTP && log.level=Logging.Debug
+		# Merge can be used to construct a new NamedTuple
+		# which effectively is the overwriting of fields of a NamedTuple
+		return merge(log, (; level=Logging.Info))
+	else
+		return log
+	end
+end
+
+global_logger(transformer_logger)
 ```
 
