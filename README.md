@@ -6,8 +6,50 @@
 
 ![Diagram showing how loggers connect](diag.svg)
 
+# Discussion: Compositional Loggers
 
-## Usage
+LoggingExtras is designs around allowing you to build arbitrarily complicated 
+systems for "log plumbing". That is to say basically routing logged information to different places.
+It is built around the idea of simple parts which are composed together,
+to allow for powerful and flexible definition of your logging system.
+Without having to define any custom loggers by subtyping `AbstractLogger`.
+When we talk about composability we mean to say that the composition of any set of Loggers is itself a Logger.
+LoggingExtras is a composable logging system.
+
+Loggers can be broken down into 4 types:
+ - *Sinks*: Sinks are the final end point of a log messages journey. They write it to file, or display it on the console, or set off a red flashing light in the laboratory. A Sink should never decide what to accept, only what to do with it.
+ - *Filters*: Filters wrap around other loggers and decide wether or not to pass on a message. Thery can further be broken down by when that decision occurs (See `ActiveFilteredLogger` vs `EarlyFilteredLogger`).
+ - *Transformers*: Transformers modify the content of log messages, before passing them on. This includes the metadata like severity level. Unlike Filters they can't block a log message, but they could drop its level down to say `Debug` so that normally noone would see it.
+ - *Demux*: There is only one possible Demux Logger. and it is central to log routing. It acts as a hub that recieves 1 log message, and then sends copies of it to all its child loggers. Like iin the diagram above, it can be composed with Filters to control what goes where.
+
+This is a basically full taxonomy of all compositional loggers.
+Other than `Sinks`, this package implements the full set. So you shouldn't need to build your own routing components, just configure the ones included in this package.
+
+It is worth understanding the idea of logging purity.
+The loggers defined in this package are all pure.
+The Filters, only filter, the Sinks only sink, the transformers only Transform.
+
+We can contrast this to the the `ConsoleLogger` (the standard logger in the REPL).
+The `ConsoleLogger` is an in-pure sink.
+As well as displaying logs to the user (as a Sink);
+it uses the log content, in the form of the `max_log` kwarg to decide if a log should be displayed (Active Filtering);
+and it has a min_enabled_level setting, that controls if it will accept a message at all 
+(Early Filtering, in particular see `MinLevelLogger`).
+If it was to be defined in a compositional way,
+we would write;
+```
+
+const ConsoleLogger(stream, min_level) = 
+	MinLevelLogger(
+		ActiveFilteredLogger(max_log_filter,
+			PureConsoleLogger(stream)
+		),
+		min_level
+	)
+```
+
+
+# Usage
 Load the package with `using LoggingExtras`.
 You likely also want to load the `Logging` standard lib.
 Loggers can be constructed and used like normal.
@@ -276,4 +318,5 @@ end
 
 global_logger(transformer_logger)
 ```
+
 
