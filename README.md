@@ -82,6 +82,7 @@ This package introduces 5 new loggers.
 The `DemuxLogger`, the `FileLogger`, and 3 types of filtered logger.
 All of them just wrap existing loggers.
  - The `DemuxLogger` sends the logs to multiple different loggers.
+ - The `TransformerLogger` applies a function to modify log messages before passing them on.
  - The `FileLogger` is a simple logger sink that writes to file.
  - The 3 filter loggers are used to control if a message is written or not
      - The `MinLevelLogger` only allowes messages to pass that are above a given level of severity
