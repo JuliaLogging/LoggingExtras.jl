@@ -19,7 +19,7 @@ function handle_message(logger::MinLevelLogger, args...; kwargs...)
 end
 
 function shouldlog(logger::MinLevelLogger, args...)
-    comp_shouldlog(logger.logger, args...)
+    return comp_shouldlog(logger.logger, args...)
 end
 
 function min_enabled_level(logger::MinLevelLogger)
