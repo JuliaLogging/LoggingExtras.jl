@@ -39,7 +39,7 @@ If it was to be defined in a compositional way,
 we would write;
 ```
 
-const ConsoleLogger(stream, min_level) = 
+ConsoleLogger(stream, min_level) = 
 	MinLevelLogger(
 		ActiveFilteredLogger(max_log_filter,
 			PureConsoleLogger(stream)
