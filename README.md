@@ -184,7 +184,7 @@ end
 The `EarlyFilteredLogger` is similar to the `ActiveFilteredLogger`,
 but it runs earlier in the logging pipeline.
 In particular it runs before the message is computed.
-It is (theoretically) useful to filter things early if creating the log message is expective.
+It can be useful to filter things early if creating the log message is expensive.
 E.g. if it includes summary statistics of the error.
 The filter function for early filter logging only has access to the 
 `level`, `_module`, `id` and `group` fields of the log message.
