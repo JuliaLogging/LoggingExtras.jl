@@ -8,7 +8,7 @@
 
 # Discussion: Compositional Loggers
 
-LoggingExtras is designs around allowing you to build arbitrarily complicated 
+LoggingExtras is designs around allowing you to build arbitrarily complicated
 systems for "log plumbing". That is to say basically routing logged information to different places.
 It is built around the idea of simple parts which are composed together,
 to allow for powerful and flexible definition of your logging system.
@@ -30,16 +30,15 @@ The loggers defined in this package are all pure.
 The Filters, only filter, the Sinks only sink, the transformers only Transform.
 
 We can contrast this to the the `ConsoleLogger` (the standard logger in the REPL).
-The `ConsoleLogger` is an in-pure sink.
+The `ConsoleLogger` is an impure sink.
 As well as displaying logs to the user (as a Sink);
 it uses the log content, in the form of the `max_log` kwarg to decide if a log should be displayed (Active Filtering);
-and it has a min_enabled_level setting, that controls if it will accept a message at all 
+and it has a min_enabled_level setting, that controls if it will accept a message at all
 (Early Filtering, in particular see `MinLevelLogger`).
 If it was to be defined in a compositional way,
-we would write;
+we would write something along the lines of:
 ```
-
-ConsoleLogger(stream, min_level) = 
+ConsoleLogger(stream, min_level) =
 	MinLevelLogger(
 		ActiveFilteredLogger(max_log_filter,
 			PureConsoleLogger(stream)
@@ -76,27 +75,21 @@ logger = global_logger()
 ```
 
 # Loggers introduced by this package:
-
-
-This package introduces 5 new loggers.
-The `DemuxLogger`, the `FileLogger`, and 3 types of filtered logger.
+This package introduces 6 new loggers.
+The `DemuxLogger`, the `TransformerLogger`, 3 types of filtered logger, and the `FileLogger`.
 All of them just wrap existing loggers.
  - The `DemuxLogger` sends the logs to multiple different loggers.
  - The `TransformerLogger` applies a function to modify log messages before passing them on.
- - The `FileLogger` is a simple logger sink that writes to file.
  - The 3 filter loggers are used to control if a message is written or not
      - The `MinLevelLogger` only allowes messages to pass that are above a given level of severity
      - The `EarlyFilteredLogger` lets you write filter rules based on the `level`, `module`, `group` and `id` of the log message
      - The `ActiveFilteredLogger` lets you filter based on the full content
-
+ - The `FileLogger` is a simple logger sink that writes to file.
 
 By combining `DemuxLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
-The `FileLogger` is just a convience wrapper around the base julia `SimpleLogger`,
-to make it easier to pass in a filename, rather than a stream.
 
-
-## `DemuxLogger` and `FileLogger`
+## `DemuxLogger`
 
 The `DemuxLogger` sends the log messages to multiple places.
 It takes a list of loggers.
@@ -107,13 +100,18 @@ It is up to those loggers to determine if they will accept it.
 Which they do using their methods for `shouldlog` and `min_enabled_level`.
 Or you can do, by wrapping them in a filtered logger  as discussed below.
 
+## `FileLogger`
 The `FileLogger` does logging to file.
+It is just a convience wrapper around the base julia `SimpleLogger`,
+to make it easier to pass in a filename, rather than a stream.
 It is really simple.
-It takes a filename,
+ - It takes a filename,
  - a kwarg to check if should `always_flush` (default: `true`).
  - a kwarg to `append` rather than overwrite (default `false`. i.e. overwrite by default)
+The resulting file format is similar to that which is shown in the REPL.
+(Not identical, but similar)
 
-### Demo
+### Demo: `DemuxLogger` and `FileLogger`
 We are going to log info and above to one file,
 and warnings and above to another.
 
@@ -123,7 +121,7 @@ julia> using Logging; using LoggingExtras;
 julia> demux_logger = DemuxLogger(
 	MinLevelLogger(FileLogger("info.log"), Logging.Info),
 	MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
-	include_current_global=false
+    include_current_global=false
 );
 
 
@@ -164,7 +162,7 @@ We want to filter to only log strings staring with `"Yo Dawg!"`.
 julia> function yodawg_filter(log_args)
 	startswith(log_args.message, "Yo Dawg!")
 end
- yodawg_filter (generic function with 1 method)                                                                                     
+ yodawg_filter (generic function with 1 method)
 
 julia> filtered_logger = ActiveFilteredLogger(yodawg_filter, global_logger());
 
@@ -186,7 +184,7 @@ but it runs earlier in the logging pipeline.
 In particular it runs before the message is computed.
 It can be useful to filter things early if creating the log message is expensive.
 E.g. if it includes summary statistics of the error.
-The filter function for early filter logging only has access to the 
+The filter function for early filter logging only has access to the
 `level`, `_module`, `id` and `group` fields of the log message.
 The most notable use of it is to filter based on modules,
 see the HTTP example below.
@@ -197,35 +195,35 @@ Another example is using them to stop messages every being repeated within a giv
 using Dates, Logging, LoggingExtras
 
 julia> function make_throttled_logger(period)
-         history = Dict{Symbol, DateTime}()
-         # We are going to use a closure
-         EarlyFilteredLogger(global_logger()) do log
-           if !haskey(history, log.id) || (period < now() - history[log.id])
-             # then we will log it, and update record of when we did
-             history[log.id] = now()
-             return true
-           else
-             return false
-           end
-         end
-       end
+    history = Dict{Symbol, DateTime}()
+    # We are going to use a closure
+    EarlyFilteredLogger(global_logger()) do log
+        if !haskey(history, log.id) || (period < now() - history[log.id])
+            # then we will log it, and update record of when we did
+            history[log.id] = now()
+            return true
+        else
+            return false
+        end
+    end
+end
 make_throttled_logger (generic function with 1 method)
 
 julia> throttled_logger = make_throttled_logger(Second(3));
 
 julia> with_logger(throttled_logger) do
-         for ii in 1:10
-           sleep(1)
-           @info "It happen" ii
-         end
-       end
-┌ Info: It happen
+    for ii in 1:10
+        sleep(1)
+        @info "It happened" ii
+    end
+end
+┌ Info: It happened
 └   ii = 1
-┌ Info: It happen
+┌ Info: It happened
 └   ii = 4
-┌ Info: It happen
+┌ Info: It happened
 └   ii = 7
-┌ Info: It happen
+┌ Info: It happened
 └   ii = 10
 ```
 
@@ -249,19 +247,19 @@ A simple example of its use is truncating messages.
 julia> using Logging, LoggingExtras
 
 julia> truncating_logger  = TransformerLogger(global_logger()) do log
-           if length(log.message) > 128
-               short_message = log.message[1:min(end, 125)] * "..."
-               return merge(log, (;message=short_message))
-           else
-               return log
-           end
-       end;
+    if length(log.message) > 128
+        short_message = log.message[1:min(end, 125)] * "..."
+        return merge(log, (;message=short_message))
+    else
+        return log
+    end
+end;
 
 julia> with_logger(truncating_logger) do
-           @info "the truncating logger only truncates long messages"
-           @info "Like this one that is this is a long and rambling message, it just keeps going and going and going,  and it seems like it will never end."
-           @info "Not like this one, that is is short"
-       end
+    @info "the truncating logger only truncates long messages"
+    @info "Like this one that is this is a long and rambling message, it just keeps going and going and going,  and it seems like it will never end."
+    @info "Not like this one, that is is short"
+end
 [ Info: the truncating logger only truncates long messages
 [ Info: Like this one that is this is a long and rambling message, it just keeps going and going and going,  and it seems like it wil...
 [ Info: Not like this one, that is is short
@@ -279,7 +277,7 @@ using LoggingExtras
 using Logging
 
 function sensible_message_filter(log)
-	length(log.message) < 1028
+    length(log.message) < 1028
 end
 
 global_logger(ActiveFilteredLogger(sensible_message_filter, global_logger()))
@@ -294,7 +292,7 @@ using Logging
 using HTTP
 
 function not_HTTP_message_filter(log)
-	log._module != HTTP
+    log._module != HTTP
 end
 
 global_logger(EarlyFilteredLogger(not_HTTP_message_filter, global_logger()))
@@ -308,8 +306,8 @@ using Logging
 using HTTP
 
 transformer_logger(global_logger()) do log
-	if log._module == HTTP && log.level=Logging.Debug
-		# Merge can be used to construct a new NamedTuple
+    if log._module == HTTP && log.level=Logging.Debug
+	    # Merge can be used to construct a new NamedTuple
 		# which effectively is the overwriting of fields of a NamedTuple
 		return merge(log, (; level=Logging.Info))
 	else
@@ -319,5 +317,3 @@ end
 
 global_logger(transformer_logger)
 ```
-
-
