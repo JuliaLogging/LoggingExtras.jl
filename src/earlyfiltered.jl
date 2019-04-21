@@ -1,5 +1,5 @@
 """
-	EarlyFilteredLogger(filter, logger)
+    EarlyFilteredLogger(filter, logger)
 
 Wraps `logger` in an filter that runs before the log message is created.
 
@@ -16,8 +16,8 @@ As input it will be given a named tuple with the following fields:
 See `?LoggingExtra.shouldlog_args` for more information on what each is.
 """
 struct EarlyFilteredLogger{T <: AbstractLogger, F} <: AbstractLogger
-	filter::F
-	logger::T
+    filter::F
+    logger::T
 end
 
 

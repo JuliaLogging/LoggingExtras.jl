@@ -39,12 +39,12 @@ If it was to be defined in a compositional way,
 we would write something along the lines of:
 ```
 ConsoleLogger(stream, min_level) =
-	MinLevelLogger(
-		ActiveFilteredLogger(max_log_filter,
-			PureConsoleLogger(stream)
-		),
-		min_level
-	)
+    MinLevelLogger(
+        ActiveFilteredLogger(max_log_filter,
+            PureConsoleLogger(stream)
+        ),
+        min_level
+    )
 ```
 
 
@@ -60,7 +60,7 @@ For full details, see the [Julia documentation on Logging](https://docs.julialan
 To use a `logger` in a given scope do
 ```
 with_logger(logger) do
-	#things
+    #things
 end
 ```
 
@@ -119,17 +119,17 @@ and warnings and above to another.
 julia> using Logging; using LoggingExtras;
 
 julia> demux_logger = DemuxLogger(
-	MinLevelLogger(FileLogger("info.log"), Logging.Info),
-	MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
+    MinLevelLogger(FileLogger("info.log"), Logging.Info),
+    MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
     include_current_global=false
 );
 
 
 julia> with_logger(demux_logger) do
-	@warn("It is bad")
-	@info("normal stuff")
-	@error("THE WORSE THING")
-	@debug("it is chill")
+    @warn("It is bad")
+    @info("normal stuff")
+    @error("THE WORSE THING")
+    @debug("it is chill")
 end
 
 shell>  cat warn.log
@@ -160,17 +160,17 @@ We want to filter to only log strings staring with `"Yo Dawg!"`.
 
 ```
 julia> function yodawg_filter(log_args)
-	startswith(log_args.message, "Yo Dawg!")
+    startswith(log_args.message, "Yo Dawg!")
 end
  yodawg_filter (generic function with 1 method)
 
 julia> filtered_logger = ActiveFilteredLogger(yodawg_filter, global_logger());
 
 julia> with_logger(filtered_logger) do
-	@info "Boring message"
-	@warn "Yo Dawg! it is bad"
-	@info "Another boring message"
-	@info "Yo Dawg! it is all good"
+    @info "Boring message"
+    @warn "Yo Dawg! it is bad"
+    @info "Another boring message"
+    @info "Yo Dawg! it is all good"
 end
 ┌ Warning: Yo Dawg! it is bad
 └ @ Main REPL[28]:3
@@ -307,12 +307,12 @@ using HTTP
 
 transformer_logger(global_logger()) do log
     if log._module == HTTP && log.level=Logging.Debug
-	    # Merge can be used to construct a new NamedTuple
-		# which effectively is the overwriting of fields of a NamedTuple
-		return merge(log, (; level=Logging.Info))
-	else
-		return log
-	end
+        # Merge can be used to construct a new NamedTuple
+        # which effectively is the overwriting of fields of a NamedTuple
+        return merge(log, (; level=Logging.Info))
+    else
+        return log
+    end
 end
 
 global_logger(transformer_logger)

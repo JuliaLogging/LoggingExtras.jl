@@ -17,7 +17,6 @@ using Test: collect_test_logs, TestLogger
     end
     @test length(testlogger_info.logs) == 3
     @test length(testlogger_warn.logs) == 1
-
 end
 
 
@@ -42,7 +41,7 @@ end
     yodawg_filter(logargs) = startswith(logargs.message, "Yo Dawg!")
 
     filtered_logger = ActiveFilteredLogger(yodawg_filter, testlogger)
-    
+
     with_logger(filtered_logger) do
         @info "info1"
         @warn "Yo Dawg! It is a warning"
@@ -58,7 +57,7 @@ end
     filtered_logger = EarlyFilteredLogger(testlogger) do logargs
         logargs.level == Info  # Only exactly Info, nothing more nothing less
     end
-    
+
     with_logger(filtered_logger) do
         @info "info1"
         @warn "Yo Dawg! It is a warning"
@@ -71,7 +70,7 @@ end
 @testset "MinLevel Filter" begin
     testlogger = TestLogger()
     filtered_logger = MinLevelLogger(testlogger, Warn)
-    
+
     with_logger(filtered_logger) do
         @info "info1"
         @warn "Yo Dawg! It is a warning"
@@ -94,7 +93,7 @@ end
             return log_msg
         end
     end
-    
+
     with_logger(transformer_logger) do
         @info "info1"
         @warn "Yo Dawg! It is a warning"
@@ -105,5 +104,3 @@ end
     end
     @test length(testlogger.logs) == 2
 end
-
-

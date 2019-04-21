@@ -13,20 +13,20 @@ See `?LoggingExtra.handle_message_args` for more information on what each is.
 """
 struct TransformerLogger{T<:AbstractLogger, F} <: AbstractLogger
     transform::F
-	logger::T
+    logger::T
 end
 
 
 function handle_message(transformer::TransformerLogger, args...; kwargs...)
-	log_args = handle_message_args(args...; kwargs...)
+    log_args = handle_message_args(args...; kwargs...)
     new_log_args = transformer.transform(log_args)
-    
+
     args = Tuple(new_log_args)[1:end-1]
     kwargs = new_log_args.kwargs
 
     if comp_handle_message_check(transformer.logger, args...; kwargs...)
-		handle_message(transformer.logger, args...; kwargs...)
-	end
+        handle_message(transformer.logger, args...; kwargs...)
+    end
 end
 
 shouldlog(transformer::TransformerLogger, args...) = true

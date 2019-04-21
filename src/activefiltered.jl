@@ -1,5 +1,5 @@
 """
-	ActiveFilteredLogger(filter, logger)
+    ActiveFilteredLogger(filter, logger)
 
 Wraps `logger` in an active filter.
 While loggers intrinsictally have in built filtering mechanisms.
@@ -20,8 +20,8 @@ As input it will be given a named tuple with the following fields:
 See `?LoggingExtra.handle_message_args` for more information on what each is.
 """
 struct ActiveFilteredLogger{T <: AbstractLogger, F} <: AbstractLogger
-	filter::F
-	logger::T
+    filter::F
+    logger::T
 end
 
 
@@ -29,8 +29,8 @@ function handle_message(logger::ActiveFilteredLogger, args...; kwargs...)
     log_args = handle_message_args(args...; kwargs...)
     if comp_handle_message_check(logger.logger, args...; kwargs...)
         if logger.filter(log_args)
-		    handle_message(logger.logger, args...; kwargs...)
-	    end
+            handle_message(logger.logger, args...; kwargs...)
+        end
     end
 end
 
@@ -67,5 +67,3 @@ function handle_message_args(args...; kwargs...)
     fieldvals = (args..., kwargs)
     return NamedTuple{fieldnames, typeof(fieldvals)}(fieldvals)
 end
-
-

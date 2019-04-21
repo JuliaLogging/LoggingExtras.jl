@@ -1,5 +1,5 @@
 """
-	MinLevelLogger(logger, min_enabled_level)
+    MinLevelLogger(logger, min_enabled_level)
 
 Wraps `logger` in an filter that runs before the log message is created.
 In many ways this is just a specialised [`EarlyFilteredLogger`](@ref)
@@ -7,7 +7,7 @@ that only checks the level.
 This filter only allowed messages on or above the `min_enabled_level` to pass.
 """
 struct MinLevelLogger{T <: AbstractLogger, L} <: AbstractLogger
-	logger::T
+    logger::T
     min_level::L
 end
 

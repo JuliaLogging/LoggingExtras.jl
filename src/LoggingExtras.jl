@@ -6,7 +6,7 @@ using Base.CoreLogging:
 
 import Base.CoreLogging:
     AbstractLogger, SimpleLogger,
-	handle_message, shouldlog, min_enabled_level, catch_exceptions
+    handle_message, shouldlog, min_enabled_level, catch_exceptions
 
 export demux_global_logger,
     DemuxLogger, TransformerLogger, FileLogger,

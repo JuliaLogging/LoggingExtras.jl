@@ -1,5 +1,5 @@
 struct FileLogger <: AbstractLogger
-	logger::SimpleLogger
+    logger::SimpleLogger
     always_flush::Bool
 end
 
@@ -10,7 +10,7 @@ end
 
 
 function handle_message(filelogger::FileLogger, args...; kwargs...)
-	handle_message(filelogger.logger, args...; kwargs...)
+    handle_message(filelogger.logger, args...; kwargs...)
     filelogger.always_flush && flush(filelogger.logger.stream)
 end
 shouldlog(filelogger::FileLogger, arg...) = true
