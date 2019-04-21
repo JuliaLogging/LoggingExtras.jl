@@ -1,7 +1,7 @@
 name = "LoggingExtras"
 uuid = "bda5643c-bbc4-11e8-2bd7-9ffae705afc0"
 authors = ["Lyndon White <oxinabox@ucc.asn.au>"]
-version = "0.2.0"
+version = "0.3.0"
 
 [compat]
 julia = "0.7, 1"
