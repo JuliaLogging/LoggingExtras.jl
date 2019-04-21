@@ -266,7 +266,8 @@ end
 ```
 
 It can also be used to do things such as change the log level of messages from a particular module (see the example below).
-
+Or to set common properties for all log messages within the `with_logger` block,
+for example to set them all to the same `group`.
 
 # More Examples
 
