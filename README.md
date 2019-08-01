@@ -41,7 +41,7 @@ we would write something along the lines of:
 ConsoleLogger(stream, min_level) =
     MinLevelLogger(
         ActiveFilteredLogger(max_log_filter,
-            PureConsoleLogger(stream)
+            PureSinkConsoleLogger(stream)
         ),
         min_level
     )
