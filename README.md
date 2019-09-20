@@ -321,7 +321,7 @@ global_logger(transformer_logger)
 
 ## Add timestamp to all logging
 
-```
+```julia
 using Logging, LoggingExtras, Dates 
 
 const date_format = "yyyy-mm-dd HH:MM:SS"
@@ -331,4 +331,13 @@ timestamp_logger(logger) = TransformerLogger(logger) do log
 end
 
 ConsoleLogger(stdout, Logging.Debug) |> timestamp_logger |> global_logger
+```
+
+This will produce output similar to: 
+```julia
+[ Info: 2019-09-20 17:43:54 /es/update 200
+┌ Debug: 2019-09-20 18:03:25 Recompiling stale cache file /.julia/compiled/v1.2/TranslationsController.ji for TranslationsController [top-level]
+└ @ Base loading.jl:1240
+┌ Error: 2019-09-20 17:43:54 ErrorException("SearchLight validation error(s) for Translations.Translation")
+└ @ TranslationsController ~/Dropbox/Projects/LiteCMS/app/resources/translations/TranslationsController.jl:69
 ```
