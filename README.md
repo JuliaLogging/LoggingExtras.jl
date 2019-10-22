@@ -37,7 +37,7 @@ and it has a min_enabled_level setting, that controls if it will accept a messag
 (Early Filtering, in particular see `MinLevelLogger`).
 If it was to be defined in a compositional way,
 we would write something along the lines of:
-```
+```julia
 ConsoleLogger(stream, min_level) =
     MinLevelLogger(
         ActiveFilteredLogger(max_log_filter,
@@ -58,19 +58,19 @@ Loggers can be constructed and used like normal.
 For full details, see the [Julia documentation on Logging](https://docs.julialang.org/en/v1/stdlib/Logging/index.html)
 
 To use a `logger` in a given scope do
-```
+```julia
 with_logger(logger) do
     #things
 end
 ```
 
 To make a logger the global logger, use
-```
+```julia
 global_logger(logger)
 ```
 
 to get the current global logger, use
-```
+```julia
 logger = global_logger()
 ```
 
@@ -115,7 +115,7 @@ The resulting file format is similar to that which is shown in the REPL.
 We are going to log info and above to one file,
 and warnings and above to another.
 
-```
+```julia
 julia> using Logging; using LoggingExtras;
 
 julia> demux_logger = DemuxLogger(
@@ -158,7 +158,7 @@ The filter function takes the full set of parameters of the message.
 ### Demo
 We want to filter to only log strings staring with `"Yo Dawg!"`.
 
-```
+```julia
 julia> function yodawg_filter(log_args)
     startswith(log_args.message, "Yo Dawg!")
 end
@@ -191,7 +191,7 @@ see the HTTP example below.
 
 Another example is using them to stop messages every being repeated within a given time period.
 
-```
+```julia
 using Dates, Logging, LoggingExtras
 
 julia> function make_throttled_logger(period)
@@ -243,7 +243,7 @@ and should return a new modified named tuple.
 
 A simple example of its use is truncating messages.
 
-```
+```julia
 julia> using Logging, LoggingExtras
 
 julia> truncating_logger  = TransformerLogger(global_logger()) do log
@@ -273,7 +273,7 @@ for example to set them all to the same `group`.
 
 ## Filter out any overly long messages
 
-```
+```julia
 using LoggingExtras
 using Logging
 
@@ -287,7 +287,7 @@ global_logger(ActiveFilteredLogger(sensible_message_filter, global_logger()))
 
 ## Filterout any messages from HTTP
 
-```
+```julia
 using LoggingExtras
 using Logging
 using HTTP
@@ -301,7 +301,7 @@ global_logger(EarlyFilteredLogger(not_HTTP_message_filter, global_logger()))
 
 ## Raising HTTP debug level errors to be Info level
 
-```
+```julia
 using LoggingExtras
 using Logging
 using HTTP
