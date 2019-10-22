@@ -8,8 +8,7 @@ import Base.CoreLogging:
     AbstractLogger, SimpleLogger,
     handle_message, shouldlog, min_enabled_level, catch_exceptions
 
-export demux_global_logger,
-    TeeLogger, TransformerLogger, FileLogger,
+export TeeLogger, TransformerLogger, FileLogger,
     ActiveFilteredLogger, EarlyFilteredLogger, MinLevelLogger
 
 
