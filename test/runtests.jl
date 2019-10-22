@@ -1,21 +1,33 @@
 using LoggingExtras
 using Test
+using Test: collect_test_logs, TestLogger
+
 using Base.CoreLogging
 using Base.CoreLogging: BelowMinLevel, Debug, Info, Warn, Error
 
-using Test: collect_test_logs, TestLogger
 
 @testset "Tee" begin
-    testlogger_info = TestLogger(min_level=Info)
-    testlogger_warn = TestLogger(min_level=Warn)
+    @testset "contructor" begin
+        @testset "mixed types" begin
+            @test TeeLogger(TestLogger(), NullLogger()) isa TeeLogger
+        end
 
-    with_logger(TeeLogger(testlogger_warn, testlogger_info)) do
-        @info "info1"
-        @warn "warn1"
-        @info "info2"
+        @testset "errors if given nonloggers" begin
+            @test_throws Exception TeeLogger(stdout, stderr)
+        end
     end
-    @test length(testlogger_info.logs) == 3
-    @test length(testlogger_warn.logs) == 1
+    @testset "basic use with compositional levels" begin
+        testlogger_info = TestLogger(min_level=Info)
+        testlogger_warn = TestLogger(min_level=Warn)
+
+        with_logger(TeeLogger(testlogger_warn, testlogger_info)) do
+            @info "info1"
+            @warn "warn1"
+            @info "info2"
+        end
+        @test length(testlogger_info.logs) == 3
+        @test length(testlogger_warn.logs) == 1
+    end
 end
 
 

@@ -1,5 +1,5 @@
-struct TeeLogger <: AbstractLogger
-    loggers::Vector{AbstractLogger}
+struct TeeLogger{T<:NTuple{<:Any, AbstractLogger}} <: AbstractLogger
+    loggers::T
 end
 
 
@@ -15,7 +15,6 @@ to include the global logger, do:
 `TeeLogger(global_logger(), loggers...)`
 """
 function TeeLogger(loggers::Vararg{AbstractLogger})
-    loggers = Vector{AbstractLogger}(collect(loggers))
     return TeeLogger(loggers)
 end
 
