@@ -12,7 +12,7 @@ LoggingExtras is designs around allowing you to build arbitrarily complicated
 systems for "log plumbing". That is to say basically routing logged information to different places.
 It is built around the idea of simple parts which are composed together,
 to allow for powerful and flexible definition of your logging system.
-Without having to define any custom loggers by subtyping `AbstractLogger`.
+Without you having to define any custom loggers by subtyping `AbstractLogger`.
 When we talk about composability we mean to say that the composition of any set of Loggers is itself a Logger.
 LoggingExtras is a composable logging system.
 
