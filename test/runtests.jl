@@ -1,16 +1,15 @@
 using LoggingExtras
 using Test
 using Base.CoreLogging
-using Base.CoreLogging: Debug, Info, Warn, Error
+using Base.CoreLogging: BelowMinLevel, Debug, Info, Warn, Error
 
 using Test: collect_test_logs, TestLogger
 
-
-@testset "Demux" begin
+@testset "Tee" begin
     testlogger_info = TestLogger(min_level=Info)
     testlogger_warn = TestLogger(min_level=Warn)
 
-    with_logger(DemuxLogger(testlogger_warn, testlogger_info)) do
+    with_logger(TeeLogger(testlogger_warn, testlogger_info)) do
         @info "info1"
         @warn "warn1"
         @info "info2"
@@ -103,4 +102,21 @@ end
         @error "MISTAKES WERE MADE"
     end
     @test length(testlogger.logs) == 2
+end
+
+
+@testset "Deprecations" begin
+    testlogger = TestLogger(min_level=BelowMinLevel)
+
+    demux_logger = DemuxLogger(testlogger)
+    @test demux_logger isa TeeLogger
+    @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+
+    demux_logger = DemuxLogger(testlogger; include_current_global=true)
+    @test demux_logger isa TeeLogger
+    @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+
+    demux_logger = DemuxLogger(testlogger; include_current_global=false)
+    @test demux_logger isa TeeLogger
+    @test Set(demux_logger.loggers) == Set([testlogger])
 end
