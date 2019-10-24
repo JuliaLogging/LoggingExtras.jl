@@ -76,9 +76,9 @@ logger = global_logger()
 
 # Loggers introduced by this package:
 This package introduces 6 new loggers.
-The `DemuxLogger`, the `TransformerLogger`, 3 types of filtered logger, and the `FileLogger`.
+The `TeeLogger`, the `TransformerLogger`, 3 types of filtered logger, and the `FileLogger`.
 All of them just wrap existing loggers.
- - The `DemuxLogger` sends the logs to multiple different loggers.
+ - The `TeeLogger` sends the logs to multiple different loggers.
  - The `TransformerLogger` applies a function to modify log messages before passing them on.
  - The 3 filter loggers are used to control if a message is written or not
      - The `MinLevelLogger` only allowes messages to pass that are above a given level of severity
@@ -86,15 +86,15 @@ All of them just wrap existing loggers.
      - The `ActiveFilteredLogger` lets you filter based on the full content
  - The `FileLogger` is a simple logger sink that writes to file.
 
-By combining `DemuxLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
+By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
 
-## `DemuxLogger`
+## `TeeLogger`
 
-The `DemuxLogger` sends the log messages to multiple places.
+The `TeeLogger` sends the log messages to multiple places.
 It takes a list of loggers.
-It also has the keyword argument `include_current_global`,
-to determine if you also want to log to the global logger.
+You often want to pass the `current_logger()` or `global_logger()`
+as one of those inputs so it keeps going to that one as well.
 
 It is up to those loggers to determine if they will accept it.
 Which they do using their methods for `shouldlog` and `min_enabled_level`.
@@ -111,17 +111,16 @@ It is really simple.
 The resulting file format is similar to that which is shown in the REPL.
 (Not identical, but similar)
 
-### Demo: `DemuxLogger` and `FileLogger`
+### Demo: `TeeLogger` and `FileLogger`
 We are going to log info and above to one file,
 and warnings and above to another.
 
 ```julia
 julia> using Logging; using LoggingExtras;
 
-julia> demux_logger = DemuxLogger(
+julia> demux_logger = TeeLogger(
     MinLevelLogger(FileLogger("info.log"), Logging.Info),
     MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
-    include_current_global=false
 );
 
 

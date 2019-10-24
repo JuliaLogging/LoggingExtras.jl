@@ -8,8 +8,7 @@ import Base.CoreLogging:
     AbstractLogger, SimpleLogger,
     handle_message, shouldlog, min_enabled_level, catch_exceptions
 
-export demux_global_logger,
-    DemuxLogger, TransformerLogger, FileLogger,
+export TeeLogger, TransformerLogger, FileLogger,
     ActiveFilteredLogger, EarlyFilteredLogger, MinLevelLogger
 
 
@@ -32,11 +31,12 @@ function comp_handle_message_check(logger, args...; kwargs...)
 end
 ###############################
 
-include("demux.jl")
+include("tee.jl")
 include("transformer.jl")
 include("activefiltered.jl")
 include("earlyfiltered.jl")
 include("minlevelfiltered.jl")
 include("filelogger.jl")
+include("deprecated.jl")
 
 end # module
