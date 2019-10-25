@@ -31,6 +31,31 @@ using Base.CoreLogging: BelowMinLevel, Debug, Info, Warn, Error
 end
 
 
+@testset "FirstMatch" begin
+    @testset "contructor" begin
+        @testset "mixed types" begin
+            @test FirstMatchLogger(TestLogger(), NullLogger()) isa FirstMatchLogger
+        end
+
+        @testset "errors if given nonloggers" begin
+            @test_throws Exception FirstMatchLogger(stdout, stderr)
+        end
+    end
+    @testset "basic use with compositional levels" begin
+        testlogger_info = TestLogger(min_level=Info)
+        testlogger_warn = TestLogger(min_level=Warn)
+
+        with_logger(FirstMatchLogger(testlogger_warn, testlogger_info)) do
+            @info "info1"
+            @warn "warn1"
+            @info "info2"
+        end
+        @test length(testlogger_info.logs) == 2
+        @test length(testlogger_warn.logs) == 1
+    end
+end
+
+
 @testset "File" begin
     mktempdir() do dir
         filepath = joinpath(dir, "log")

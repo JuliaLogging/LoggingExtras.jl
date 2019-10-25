@@ -79,6 +79,7 @@ This package introduces 6 new loggers.
 The `TeeLogger`, the `TransformerLogger`, 3 types of filtered logger, and the `FileLogger`.
 All of them just wrap existing loggers.
  - The `TeeLogger` sends the logs to multiple different loggers.
+ - The `FirstMatchLogger` also sends the logs to multiple different loggers but to only at most one logger for each log.
  - The `TransformerLogger` applies a function to modify log messages before passing them on.
  - The 3 filter loggers are used to control if a message is written or not
      - The `MinLevelLogger` only allowes messages to pass that are above a given level of severity
@@ -99,6 +100,12 @@ as one of those inputs so it keeps going to that one as well.
 It is up to those loggers to determine if they will accept it.
 Which they do using their methods for `shouldlog` and `min_enabled_level`.
 Or you can do, by wrapping them in a filtered logger  as discussed below.
+
+## `FirstMatchLogger`
+
+The `FirstMatchLogger` sends the log messages to multiple places, like `TeeLogger`.
+Unlike, `TeeLogger`, it only sends a log to at most one logger that can handle the
+log message.  The first match in the list of loggers is used.
 
 ## `FileLogger`
 The `FileLogger` does logging to file.

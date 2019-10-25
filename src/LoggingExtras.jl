@@ -8,7 +8,7 @@ import Base.CoreLogging:
     AbstractLogger, SimpleLogger,
     handle_message, shouldlog, min_enabled_level, catch_exceptions
 
-export TeeLogger, TransformerLogger, FileLogger,
+export TeeLogger, FirstMatchLogger, TransformerLogger, FileLogger,
     ActiveFilteredLogger, EarlyFilteredLogger, MinLevelLogger
 
 
