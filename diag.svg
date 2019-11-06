@@ -478,7 +478,7 @@
          x="378.57144"
          y="606.93365"
          style="font-weight:bold;line-height:91.00000262%;fill:#800080"
-         id="tspan4208">Demux</tspan><tspan
+         id="tspan4208">Tee</tspan><tspan
          x="378.57144"
          y="643.33368"
          style="font-weight:bold;line-height:91.00000262%;fill:#800080"
@@ -520,7 +520,7 @@
          x="754.7005"
          y="726.24457"
          style="font-weight:bold;line-height:91.00000262%;fill:#800080"
-         id="tspan4208-7">Demux</tspan><tspan
+         id="tspan4208-7">Tee</tspan><tspan
          x="754.7005"
          y="762.64459"
          style="font-weight:bold;line-height:91.00000262%;fill:#800080"
