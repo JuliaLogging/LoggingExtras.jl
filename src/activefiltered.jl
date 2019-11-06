@@ -29,9 +29,11 @@ function handle_message(logger::ActiveFilteredLogger, args...; kwargs...)
     log_args = handle_message_args(args...; kwargs...)
     if comp_handle_message_check(logger.logger, args...; kwargs...)
         if logger.filter(log_args)
-            handle_message(logger.logger, args...; kwargs...)
+            return handle_message(logger.logger, args...; kwargs...)
         end
     end
+    # otherwise
+    return MessageHandled(false)
 end
 
 function shouldlog(logger::ActiveFilteredLogger, args...)
