@@ -6,7 +6,7 @@
 if it did not actually handle the log message.
 For example, if the log message was below the level it should log.
 This is of particular relevance to the [`ActiveFilteredLogger`](@ref), which can't know
-til `handle_message` if a log message will be filtered or not.
+util `handle_message` if a log message will be filtered or not.
 Ideally, `MessageHandled(true)` would be returned from loggers when when they
 successfully handled a message, however this is not strictly required.
 E.g Sinks should always return `MessageHandled(true)`.
