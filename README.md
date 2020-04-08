@@ -69,10 +69,16 @@ To make a logger the global logger, use
 global_logger(logger)
 ```
 
-to get the current global logger, use
+To get the current logger (which can vary per task) use
+```julia
+logger = current_logger()
+```
+
+To get the current global logger (which does not vary per task), use
 ```julia
 logger = global_logger()
 ```
+
 
 # Loggers introduced by this package:
 This package introduces 6 new loggers.
