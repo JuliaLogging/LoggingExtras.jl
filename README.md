@@ -230,6 +230,22 @@ end
 This is basically a special case of the early filtered logger,
 that just checks if the level of the message is above the level specified when it was created.
 
+### Demo: filter out all the log messages that are less severe than `Error`
+
+```julia
+julia> using Logging, LoggingExtras
+
+julia> error_only_logger = MinLevelLogger(current_logger(), Logging.Error);
+
+julia> with_logger(error_only_logger) do
+           @info("You won't see this")
+           @warn("won't see this either")
+           @error("You will only see this")
+       end
+┌ Error: You will only see this
+└ @ Main REPL[18]:4
+```
+
 ## `TransformerLogger`
 The transformer logger allows for the modification of log messages.
 This modification includes such things as its log level, and content,
