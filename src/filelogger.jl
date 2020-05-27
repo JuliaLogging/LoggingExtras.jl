@@ -3,11 +3,14 @@ struct FileLogger <: AbstractLogger
     always_flush::Bool
 end
 
-function FileLogger(path; append=false, always_flush=true)
+function FileLogger(path; append=false, kwargs...)
     filehandle = open(path, append ? "a" : "w")
-    FileLogger(SimpleLogger(filehandle, BelowMinLevel), always_flush)
+    FileLogger(filehandle; kwargs...)
 end
 
+function FileLogger(filehandle::IOStream; always_flush=true)
+    FileLogger(SimpleLogger(filehandle, BelowMinLevel), always_flush)
+end
 
 function handle_message(filelogger::FileLogger, args...; kwargs...)
     handle_message(filelogger.logger, args...; kwargs...)

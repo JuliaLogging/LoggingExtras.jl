@@ -33,16 +33,21 @@ end
 
 @testset "File" begin
     mktempdir() do dir
-        filepath = joinpath(dir, "log")
-        with_logger(FileLogger(filepath)) do
-            @info "first"
-            @warn "second"
-            @info "third"
+        for (filepath, sink) in [
+                (f = joinpath(dir, "log"); (f, f)), # Filepath
+                (f = joinpath(dir, "log_io"); (f, open(f, "w"))), # IOStream
+            ]
+            with_logger(FileLogger(sink)) do
+                @info "first"
+                @warn "second"
+                @info "third"
+            end
+            sink isa IOStream && close(sink)
+            logtext = read(filepath, String)
+            @test occursin("first", logtext)
+            @test occursin("second", logtext)
+            @test occursin("third", logtext)
         end
-        logtext = String(read(filepath))
-        @test occursin("first", logtext)
-        @test occursin("second", logtext)
-        @test occursin("third", logtext)
     end
 end
 
