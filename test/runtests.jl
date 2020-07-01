@@ -125,15 +125,21 @@ end
 @testset "Deprecations" begin
     testlogger = TestLogger(min_level=BelowMinLevel)
 
-    demux_logger = DemuxLogger(testlogger)
-    @test demux_logger isa TeeLogger
-    @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    @test_logs (:warn, r"deprecated") match_mode=:any begin
+        demux_logger = DemuxLogger(testlogger)
+        @test demux_logger isa TeeLogger
+        @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    end
 
-    demux_logger = DemuxLogger(testlogger; include_current_global=true)
-    @test demux_logger isa TeeLogger
-    @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    @test_logs (:warn, r"deprecated") match_mode=:any begin
+        demux_logger = DemuxLogger(testlogger; include_current_global=true)
+        @test demux_logger isa TeeLogger
+        @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    end
 
-    demux_logger = DemuxLogger(testlogger; include_current_global=false)
-    @test demux_logger isa TeeLogger
-    @test Set(demux_logger.loggers) == Set([testlogger])
+    @test_logs (:warn, r"deprecated") match_mode=:any begin
+        demux_logger = DemuxLogger(testlogger; include_current_global=false)
+        @test demux_logger isa TeeLogger
+        @test Set(demux_logger.loggers) == Set([testlogger])
+    end
 end
