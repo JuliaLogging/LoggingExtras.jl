@@ -81,7 +81,7 @@ logger = global_logger()
 
 
 # Loggers introduced by this package:
-This package introduces 6 new loggers.
+This package introduces 7 new loggers.
 The `TeeLogger`, the `TransformerLogger`, 3 types of filtered logger, and the `FileLogger`.
 All of them just wrap existing loggers.
  - The `TeeLogger` sends the logs to multiple different loggers.
@@ -91,6 +91,7 @@ All of them just wrap existing loggers.
      - The `EarlyFilteredLogger` lets you write filter rules based on the `level`, `module`, `group` and `id` of the log message
      - The `ActiveFilteredLogger` lets you filter based on the full content
  - The `FileLogger` is a simple logger sink that writes to file.
+ - The `DatetimeRotatingFileLogger` is a logger sink that writes to file, rotating logs based upon a user-provided `DateFormat`.
 
 By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
@@ -289,6 +290,30 @@ end
 It can also be used to do things such as change the log level of messages from a particular module (see the example below).
 Or to set common properties for all log messages within the `with_logger` block,
 for example to set them all to the same `group`.
+
+## `DatetimeRotatingFileLogger`
+Use this sink to rotate your logs based upon a given `DateFormat`, automatically closing one file and opening another
+when the `DateFormat` would change the filename.  Note that if you wish to have static portions of your filename, you must
+escape them so they are not interpreted by the `DateFormat` code.  Example:
+
+```julia
+julia> using Logging, LoggingExtras
+
+julia> rotating_logger = DatetimeRotatingFileLogger(pwd(), raw"\a\c\c\e\s\s-YYYY-mm-dd-HH-MM-SS.\l\o\g");
+
+julia> with_logger(rotating_logger) do
+       @info("This goes in one file")
+       sleep(1.1)
+       @info("This goes in another file")
+       end
+
+julia> filter(f -> endswith(f, ".log"), readdir(pwd()))
+2-element Array{String,1}:
+ "access-2020-07-13-13-24-13.log"
+ "access-2020-07-13-13-24-14.log"
+```
+
+The user implicitly controls when the files will be rolled over based on the `DateFormat` given.
 
 # More Examples
 
