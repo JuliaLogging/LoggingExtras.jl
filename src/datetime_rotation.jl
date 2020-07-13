@@ -39,33 +39,6 @@ function reopen!(drfl::DatetimeRotatingFileLogger)
     return nothing
 end
 
-# I kind of wish these were defined in Dates
-isless(::Type{Millisecond}, ::Type{Millisecond}) = false
-isless(::Type{Millisecond}, ::Type{T}) where {T <: Dates.Period} = true
-
-isless(::Type{Second}, ::Type{Millisecond}) = false
-isless(::Type{Second}, ::Type{Second}) = false
-isless(::Type{Second}, ::Type{T}) where {T <: Dates.Period} = true
-
-isless(::Type{Minute}, ::Type{Millisecond}) = false
-isless(::Type{Minute}, ::Type{Second}) = false
-isless(::Type{Minute}, ::Type{Minute}) = false
-isless(::Type{Minute}, ::Type{T}) where {T <: Dates.Period} = true
-
-isless(::Type{Hour}, ::Type{Day}) = true
-isless(::Type{Hour}, ::Type{Month}) = true
-isless(::Type{Hour}, ::Type{Year}) = true
-isless(::Type{Hour}, ::Type{T}) where {T <: Dates.Period} = false
-
-isless(::Type{Day}, ::Type{Month}) = true
-isless(::Type{Day}, ::Type{Year}) = true
-isless(::Type{Day}, ::Type{T}) where {T <: Dates.Period} = false
-
-isless(::Type{Month}, ::Type{Year}) = true
-isless(::Type{Month}, ::Type{T}) where {T <: Dates.Period} = false
-
-isless(::Type{Year}, ::Type{T}) where {T <: Dates.Period} = false
-
 """
     next_datetime_transition(fmt::DateFormat)
 
@@ -76,30 +49,37 @@ function next_datetime_transition(fmt::DateFormat)
     extract_token(x::Dates.DatePart{T}) where {T} = T
     token_timescales = Dict(
         # Milliseconds is the smallest timescale
-        's' => Millisecond,
+        's' => Millisecond(1),
         # Seconds
-        'S' => Second,
+        'S' => Second(1),
         # Minutes
-        'M' => Minute,
+        'M' => Minute(1),
         # Hours
-        'I' => Hour,
-        'H' => Hour,
+        'I' => Hour(1),
+        'H' => Hour(1),
         # Days
-        'd' => Day,
-        'e' => Day,
-        'E' => Day,
+        'd' => Day(1),
+        'e' => Day(1),
+        'E' => Day(1),
         # Month
-        'm' => Month,
-        'u' => Month,
-        'U' => Month,
+        'm' => Month(1),
+        'u' => Month(1),
+        'U' => Month(1),
         # Year
-        'y' => Year,
-        'Y' => Year,
+        'y' => Year(1),
+        'Y' => Year(1),
     )
 
+    # Dates for some reason explicitly does not define equality between the smaller
+    # timescales (Second, Minute, Day, etc..) and the larger, non-constant timescales
+    # (Month, Year).  We do so explicitly here, without committing type piracy:
+    custom_isless(x, y) = isless(x, y)
+    custom_isless(x::Union{Millisecond,Second,Minute,Hour,Day}, y::Union{Month, Year}) = true
+    custom_isless(x::Union{Month, Year}, y::Union{Millisecond,Second,Minute,Hour,Day}) = false
+
     tokens = filter(t -> isa(t, Dates.DatePart), collect(fmt.tokens))
-    minimum_timescale = minimum(map(t -> token_timescales[extract_token(t)], tokens))
-    return Dates.ceil(now(), minimum_timescale) - Second(1)
+    minimum_timescale = first(sort(map(t -> token_timescales[extract_token(t)], tokens), lt=custom_isless))
+    return ceil(now(), minimum_timescale) - Second(1)
 end
 
 calc_logpath(dir, filename_pattern) = joinpath(dir, Dates.format(now(), filename_pattern))
