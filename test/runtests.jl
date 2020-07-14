@@ -1,6 +1,7 @@
 using LoggingExtras
 using Test
 using Test: collect_test_logs, TestLogger
+using Dates
 
 using Base.CoreLogging
 using Base.CoreLogging: BelowMinLevel, Debug, Info, Warn, Error
@@ -121,19 +122,62 @@ end
     @test length(testlogger.logs) == 2
 end
 
+@testset "DatetimeRotatingFileLogger" begin
+    mktempdir() do dir
+        drfl_sec = DatetimeRotatingFileLogger(dir, raw"\s\e\c-YYYY-mm-dd-HH-MM-SS.\l\o\g")
+        drfl_min = DatetimeRotatingFileLogger(dir, raw"\m\i\n-YYYY-mm-dd-HH-MM.\l\o\g")
+        sink = TeeLogger(drfl_sec, drfl_min)
+        with_logger(sink) do
+            while millisecond(now()) < 100 || millisecond(now()) > 200
+                sleep(0.001)
+            end
+            @info "first"
+            @info "second"
+            sleep(0.9)
+            @info("third")
+        end
+
+        # Drop anything that's not a .log file or empty
+        files = sort(map(f -> joinpath(dir, f), readdir(dir)))
+        files = filter(f -> endswith(f, ".log") && filesize(f) > 0, files)
+        sec_files = filter(f -> startswith(basename(f), "sec-"), files)
+        @test length(sec_files) == 2
+
+        min_files = filter(f -> startswith(basename(f), "min-"), files)
+        @test length(min_files) == 1
+
+        sec1_data = String(read(sec_files[1]))
+        @test occursin("first", sec1_data)
+        @test occursin("second", sec1_data)
+        sec2_data = String(read(sec_files[2]))
+        @test occursin("third", sec2_data)
+
+        min_data = String(read(min_files[1]))
+        @test occursin("first", min_data)
+        @test occursin("second", min_data)
+        @test occursin("third", min_data)
+    end
+end
+
 
 @testset "Deprecations" begin
     testlogger = TestLogger(min_level=BelowMinLevel)
 
-    demux_logger = DemuxLogger(testlogger)
-    @test demux_logger isa TeeLogger
-    @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    @test_logs (:warn, r"deprecated") match_mode=:any begin
+        demux_logger = DemuxLogger(testlogger)
+        @test demux_logger isa TeeLogger
+        @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    end
 
-    demux_logger = DemuxLogger(testlogger; include_current_global=true)
-    @test demux_logger isa TeeLogger
-    @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    @test_logs (:warn, r"deprecated") match_mode=:any begin
+        demux_logger = DemuxLogger(testlogger; include_current_global=true)
+        @test demux_logger isa TeeLogger
+        @test Set(demux_logger.loggers) == Set([testlogger, global_logger()])
+    end
 
-    demux_logger = DemuxLogger(testlogger; include_current_global=false)
-    @test demux_logger isa TeeLogger
-    @test Set(demux_logger.loggers) == Set([testlogger])
+    @test_logs (:warn, r"deprecated") match_mode=:any begin
+        demux_logger = DemuxLogger(testlogger; include_current_global=false)
+        @test demux_logger isa TeeLogger
+        @test Set(demux_logger.loggers) == Set([testlogger])
+    end
 end
