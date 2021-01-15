@@ -10,7 +10,7 @@ import Base.CoreLogging:
 
 export TeeLogger, TransformerLogger, FileLogger,
     ActiveFilteredLogger, EarlyFilteredLogger, MinLevelLogger,
-    DatetimeRotatingFileLogger
+    DatetimeRotatingFileLogger, FormatLogger
 
 
 ######
@@ -39,6 +39,7 @@ include("earlyfiltered.jl")
 include("minlevelfiltered.jl")
 include("filelogger.jl")
 include("datetime_rotation.jl")
+include("formatlogger.jl")
 include("deprecated.jl")
 
 end # module
