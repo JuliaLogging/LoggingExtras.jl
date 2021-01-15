@@ -18,9 +18,9 @@ LoggingExtras is a composable logging system.
 
 Loggers can be broken down into 4 types:
  - *Sinks*: Sinks are the final end point of a log messages journey. They write it to file, or display it on the console, or set off a red flashing light in the laboratory. A Sink should never decide what to accept, only what to do with it.
- - *Filters*: Filters wrap around other loggers and decide wether or not to pass on a message. Thery can further be broken down by when that decision occurs (See `ActiveFilteredLogger` vs `EarlyFilteredLogger`).
+ - *Filters*: Filters wrap around other loggers and decide whether or not to pass on a message. They can further be broken down by when that decision occurs (See `ActiveFilteredLogger` vs `EarlyFilteredLogger`).
  - *Transformers*: Transformers modify the content of log messages, before passing them on. This includes the metadata like severity level. Unlike Filters they can't block a log message, but they could drop its level down to say `Debug` so that normally noone would see it.
- - *Demux*: There is only one possible Demux Logger. and it is central to log routing. It acts as a hub that recieves 1 log message, and then sends copies of it to all its child loggers. Like iin the diagram above, it can be composed with Filters to control what goes where.
+ - *Demux*: There is only one possible Demux Logger. and it is central to log routing. It acts as a hub that receives 1 log message, and then sends copies of it to all its child loggers. Like in the diagram above, it can be composed with Filters to control what goes where.
 
 This is a basically full taxonomy of all compositional loggers.
 This package implements the full set. So you shouldn't need to build your own routing components, just configure the ones included in this package.
@@ -86,11 +86,11 @@ The `TeeLogger`, the `TransformerLogger`, 3 types of filtered logger, the `FileL
 the `DatetimeRotatingFileLogger` and the `FormatLogger`.
 All of them, except `FormatLogger`, just wrap existing loggers.
  - The `TeeLogger` sends the logs to multiple different loggers.
- - The `TransformerLogger` applies a function to modify log messages before passing them on.
  - The 3 filter loggers are used to control if a message is written or not
-     - The `MinLevelLogger` only allowes messages to pass that are above a given level of severity
+     - The `MinLevelLogger` only allows messages to pass that are above a given level of severity
      - The `EarlyFilteredLogger` lets you write filter rules based on the `level`, `module`, `group` and `id` of the log message
      - The `ActiveFilteredLogger` lets you filter based on the full content
+ - The `TransformerLogger` applies a function to modify log messages before passing them on.
  - The `FileLogger` is a simple logger sink that writes to file.
  - The `DatetimeRotatingFileLogger` is a logger sink that writes to file, rotating logs based upon a user-provided `DateFormat`.
  - The `FormatLogger` is a logger sink that simply formats the message and writes to the logger stream.
@@ -98,7 +98,7 @@ All of them, except `FormatLogger`, just wrap existing loggers.
 By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
 
-## `TeeLogger`
+## `TeeLogger` (*Demux*)
 
 The `TeeLogger` sends the log messages to multiple places.
 It takes a list of loggers.
@@ -109,53 +109,7 @@ It is up to those loggers to determine if they will accept it.
 Which they do using their methods for `shouldlog` and `min_enabled_level`.
 Or you can do, by wrapping them in a filtered logger  as discussed below.
 
-## `FileLogger`
-The `FileLogger` does logging to file.
-It is just a convience wrapper around the base julia `SimpleLogger`,
-to make it easier to pass in a filename, rather than a stream.
-It is really simple.
- - It takes a filename,
- - a kwarg to check if should `always_flush` (default: `true`).
- - a kwarg to `append` rather than overwrite (default `false`. i.e. overwrite by default)
-The resulting file format is similar to that which is shown in the REPL.
-(Not identical, but similar)
-
-### Demo: `TeeLogger` and `FileLogger`
-We are going to log info and above to one file,
-and warnings and above to another.
-
-```julia
-julia> using Logging; using LoggingExtras;
-
-julia> demux_logger = TeeLogger(
-    MinLevelLogger(FileLogger("info.log"), Logging.Info),
-    MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
-);
-
-
-julia> with_logger(demux_logger) do
-    @warn("It is bad")
-    @info("normal stuff")
-    @error("THE WORSE THING")
-    @debug("it is chill")
-end
-
-shell>  cat warn.log
-┌ Warning: It is bad
-└ @ Main REPL[34]:2
-┌ Error: THE WORSE THING
-└ @ Main REPL[34]:4
-
-shell>  cat info.log
-┌ Warning: It is bad
-└ @ Main REPL[34]:2
-┌ Info: normal stuff
-└ @ Main REPL[34]:3
-┌ Error: THE WORSE THING
-└ @ Main REPL[34]:4
-```
-
-## `ActiveFilteredLogger`
+## `ActiveFilteredLogger` (*Filter*)
 
 The `ActiveFilteredLogger` exists to give more control over which messages should be logged.
 It warps any logger, and before sending messages to the logger to log,
@@ -185,7 +139,7 @@ end
 [ Info: Yo Dawg! it is all good
 ```
 
-## `EarlyFilteredLogger`
+## `EarlyFilteredLogger` (*Filter*)
 
 The `EarlyFilteredLogger` is similar to the `ActiveFilteredLogger`,
 but it runs earlier in the logging pipeline.
@@ -235,7 +189,7 @@ end
 └   ii = 10
 ```
 
-## `MinLevelLogger`
+## `MinLevelLogger` (*Filter*)
 This is basically a special case of the early filtered logger,
 that just checks if the level of the message is above the level specified when it was created.
 
@@ -255,12 +209,12 @@ julia> with_logger(error_only_logger) do
 └ @ Main REPL[18]:4
 ```
 
-## `TransformerLogger`
+## `TransformerLogger` (*Transformer*)
 The transformer logger allows for the modification of log messages.
 This modification includes such things as its log level, and content,
 and all the other arguments passed to `handle_message`.
 
-When constructing a `TransformerLogger` you pass in a tranformation function,
+When constructing a `TransformerLogger` you pass in a transformation function,
 and a logger to be wrapped.
 The  transformation function takes a named tuple containing all the log message fields,
 and should return a new modified named tuple.
@@ -293,7 +247,53 @@ It can also be used to do things such as change the log level of messages from a
 Or to set common properties for all log messages within the `with_logger` block,
 for example to set them all to the same `group`.
 
-## `DatetimeRotatingFileLogger`
+## `FileLogger` (*Sink*)
+The `FileLogger` does logging to file.
+It is just a convenience wrapper around the base julia `SimpleLogger`,
+to make it easier to pass in a filename, rather than a stream.
+It is really simple.
+ - It takes a filename,
+ - a kwarg to check if should `always_flush` (default: `true`).
+ - a kwarg to `append` rather than overwrite (default `false`. i.e. overwrite by default)
+The resulting file format is similar to that which is shown in the REPL.
+(Not identical, but similar)
+
+### Demo: `TeeLogger` and `FileLogger`
+We are going to log info and above to one file,
+and warnings and above to another.
+
+```julia
+julia> using Logging; using LoggingExtras;
+
+julia> demux_logger = TeeLogger(
+    MinLevelLogger(FileLogger("info.log"), Logging.Info),
+    MinLevelLogger(FileLogger("warn.log"), Logging.Warn),
+);
+
+
+julia> with_logger(demux_logger) do
+    @warn("It is bad")
+    @info("normal stuff")
+    @error("THE WORSE THING")
+    @debug("it is chill")
+end
+
+shell>  cat warn.log
+┌ Warning: It is bad
+└ @ Main REPL[34]:2
+┌ Error: THE WORSE THING
+└ @ Main REPL[34]:4
+
+shell>  cat info.log
+┌ Warning: It is bad
+└ @ Main REPL[34]:2
+┌ Info: normal stuff
+└ @ Main REPL[34]:3
+┌ Error: THE WORSE THING
+└ @ Main REPL[34]:4
+```
+
+## `DatetimeRotatingFileLogger` (*Sink*)
 Use this sink to rotate your logs based upon a given `DateFormat`, automatically closing one file and opening another
 when the `DateFormat` would change the filename.  Note that if you wish to have static portions of your filename, you must
 escape them so they are not interpreted by the `DateFormat` code.  Example:
@@ -317,7 +317,7 @@ julia> filter(f -> endswith(f, ".log"), readdir(pwd()))
 
 The user implicitly controls when the files will be rolled over based on the `DateFormat` given.
 
-## `FormatLogger`
+## `FormatLogger` (*Sink*)
 The `FormatLogger` is a sink that formats the message and prints to a wrapped IO.
 Formatting is done by providing a function `f(io::IO, log_args::NamedTuple)`.
 
@@ -389,7 +389,7 @@ global_logger(transformer_logger)
 ## Add timestamp to all logging
 
 ```julia
-using Logging, LoggingExtras, Dates 
+using Logging, LoggingExtras, Dates
 
 const date_format = "yyyy-mm-dd HH:MM:SS"
 
@@ -400,7 +400,7 @@ end
 ConsoleLogger(stdout, Logging.Debug) |> timestamp_logger |> global_logger
 ```
 
-This will produce output similar to: 
+This will produce output similar to:
 ```julia
 [ Info: 2019-09-20 17:43:54 /es/update 200
 ┌ Debug: 2019-09-20 18:03:25 Recompiling stale cache file /.julia/compiled/v1.2/TranslationsController.ji for TranslationsController [top-level]
