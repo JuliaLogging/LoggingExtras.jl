@@ -23,7 +23,7 @@ Loggers can be broken down into 4 types:
  - *Demux*: There is only one possible Demux Logger. and it is central to log routing. It acts as a hub that recieves 1 log message, and then sends copies of it to all its child loggers. Like iin the diagram above, it can be composed with Filters to control what goes where.
 
 This is a basically full taxonomy of all compositional loggers.
-Other than `Sinks`, this package implements the full set. So you shouldn't need to build your own routing components, just configure the ones included in this package.
+This package implements the full set. So you shouldn't need to build your own routing components, just configure the ones included in this package.
 
 It is worth understanding the idea of logging purity.
 The loggers defined in this package are all pure.
@@ -81,9 +81,10 @@ logger = global_logger()
 
 
 # Loggers introduced by this package:
-This package introduces 7 new loggers.
-The `TeeLogger`, the `TransformerLogger`, 3 types of filtered logger, and the `FileLogger`.
-All of them just wrap existing loggers.
+This package introduces 8 new loggers.
+The `TeeLogger`, the `TransformerLogger`, 3 types of filtered logger, the `FileLogger`,
+the `DatetimeRotatingFileLogger` and the `FormatLogger`.
+All of them, except `FormatLogger`, just wrap existing loggers.
  - The `TeeLogger` sends the logs to multiple different loggers.
  - The `TransformerLogger` applies a function to modify log messages before passing them on.
  - The 3 filter loggers are used to control if a message is written or not
@@ -92,6 +93,7 @@ All of them just wrap existing loggers.
      - The `ActiveFilteredLogger` lets you filter based on the full content
  - The `FileLogger` is a simple logger sink that writes to file.
  - The `DatetimeRotatingFileLogger` is a logger sink that writes to file, rotating logs based upon a user-provided `DateFormat`.
+ - The `FormatLogger` is a logger sink that simply formats the message and writes to the logger stream.
 
 By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
@@ -314,6 +316,25 @@ julia> filter(f -> endswith(f, ".log"), readdir(pwd()))
 ```
 
 The user implicitly controls when the files will be rolled over based on the `DateFormat` given.
+
+## `FormatLogger`
+The `FormatLogger` is a sink that formats the message and prints to a wrapped IO.
+Formatting is done by providing a function `f(io::IO, log_args::NamedTuple)`.
+
+```julia
+julia> using Logging, LoggingExtras
+
+julia> logger = FormatLogger() do io, args
+           println(io, args._module, " | ", "[", args.level, "] ", args.message)
+       end;
+
+julia> with_logger(logger) do
+           @info "This is an informational message."
+           @warn "This is a warning, should take a look."
+       end
+Main | [Info] This is an informational message.
+Main | [Warn] This is a warning, should take a look.
+```
 
 # More Examples
 

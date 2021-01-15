@@ -159,6 +159,36 @@ end
     end
 end
 
+@testset "FormatLogger" begin
+    io = IOBuffer()
+    logger = FormatLogger(io) do io, args
+        # Put in some bogus sleep calls just to test that
+        # log records writes in one go
+        print(io, args.level)
+        sleep(rand())
+        print(io, ": ")
+        sleep(rand())
+        println(io, args.message)
+    end
+    with_logger(logger) do
+        @sync begin
+            @async @debug "debug message"
+            @async @info "info message"
+            @async @warn "warning message"
+            @async @error "error message"
+        end
+    end
+    str = String(take!(io))
+    @test occursin(r"^Debug: debug message$"m, str)
+    @test occursin(r"^Info: info message$"m, str)
+    @test occursin(r"^Warn: warning message$"m, str)
+    @test occursin(r"^Error: error message$"m, str)
+    @test logger.always_flush
+    # Test constructor with default io and kwarg
+    logger = FormatLogger(x -> x; always_flush=false)
+    @test logger.io === stderr
+    @test !logger.always_flush
+end
 
 @testset "Deprecations" begin
     testlogger = TestLogger(min_level=BelowMinLevel)
