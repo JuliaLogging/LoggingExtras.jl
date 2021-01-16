@@ -38,8 +38,8 @@ include("activefiltered.jl")
 include("earlyfiltered.jl")
 include("minlevelfiltered.jl")
 include("filelogger.jl")
-include("datetime_rotation.jl")
 include("formatlogger.jl")
+include("datetime_rotation.jl")
 include("deprecated.jl")
 
 end # module

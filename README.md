@@ -316,6 +316,8 @@ julia> filter(f -> endswith(f, ".log"), readdir(pwd()))
 ```
 
 The user implicitly controls when the files will be rolled over based on the `DateFormat` given.
+To control the logging output it is possible to pass a formatter function as the first argument
+in the constructor. See `FormatLogger` for the requirements on the formatter function.
 
 ## `FormatLogger` (*Sink*)
 The `FormatLogger` is a sink that formats the message and prints to a wrapped IO.
