@@ -1,7 +1,7 @@
 
 struct FormatLogger <: AbstractLogger
     f::Function
-    io::IO
+    stream::IO
     always_flush::Bool
 end
 
@@ -39,10 +39,10 @@ function handle_message(logger::FormatLogger, args...; kwargs...)
     # We help the user by passing an IOBuffer to the formatting function
     # to make sure that everything writes to the logger io in one go.
     iob = IOBuffer()
-    ioc = IOContext(iob, logger.io)
+    ioc = IOContext(iob, logger.stream)
     logger.f(ioc, log_args)
-    write(logger.io, take!(iob))
-    logger.always_flush && flush(logger.io)
+    write(logger.stream, take!(iob))
+    logger.always_flush && flush(logger.stream)
     return nothing
 end
 shouldlog(logger::FormatLogger, arg...) = true

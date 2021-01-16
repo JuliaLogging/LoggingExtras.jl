@@ -126,7 +126,10 @@ end
     mktempdir() do dir
         drfl_sec = DatetimeRotatingFileLogger(dir, raw"\s\e\c-YYYY-mm-dd-HH-MM-SS.\l\o\g")
         drfl_min = DatetimeRotatingFileLogger(dir, raw"\m\i\n-YYYY-mm-dd-HH-MM.\l\o\g")
-        sink = TeeLogger(drfl_sec, drfl_min)
+        func = (io, args) -> println(io, reverse(args.message))
+        drfl_fmt = DatetimeRotatingFileLogger(func, dir, raw"\f\m\t-YYYY-mm-dd-HH-MM-SS.\l\o\g")
+
+        sink = TeeLogger(drfl_sec, drfl_min, drfl_fmt)
         with_logger(sink) do
             while millisecond(now()) < 100 || millisecond(now()) > 200
                 sleep(0.001)
@@ -146,6 +149,9 @@ end
         min_files = filter(f -> startswith(basename(f), "min-"), files)
         @test length(min_files) == 1
 
+        fmt_files = filter(f -> startswith(basename(f), "fmt-"), files)
+        @test length(fmt_files) == 2
+
         sec1_data = String(read(sec_files[1]))
         @test occursin("first", sec1_data)
         @test occursin("second", sec1_data)
@@ -156,6 +162,12 @@ end
         @test occursin("first", min_data)
         @test occursin("second", min_data)
         @test occursin("third", min_data)
+
+        fmt_data = String(read(fmt_files[1]))
+        @test occursin("tsrif", fmt_data)
+        @test occursin("dnoces", fmt_data)
+        fmt_data = String(read(fmt_files[2]))
+        @test occursin("driht", fmt_data)
     end
 end
 
@@ -186,7 +198,7 @@ end
     @test logger.always_flush
     # Test constructor with default io and kwarg
     logger = FormatLogger(x -> x; always_flush=false)
-    @test logger.io === stderr
+    @test logger.stream === stderr
     @test !logger.always_flush
 end
 

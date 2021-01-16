@@ -2,20 +2,35 @@ using Dates
 import Base: isless
 
 raw"""
-    DatetimeRotatingFileLogger
+    DatetimeRotatingFileLogger(dir, file_pattern; always_flush=true)
+    DatetimeRotatingFileLogger(f::Function, dir, file_pattern; always_flush=true)
 
-Constructs a FileLogger that rotates its file based on the current date.
+Construct a `DatetimeRotatingFileLogger` that rotates its file based on the current date.
+The constructor takes a log output directory, `dir`, and a filename pattern.
 The filename pattern given is interpreted through the `Dates.format()` string formatter,
 allowing for yearly all the way down to millisecond-level log rotation.  Note that if you
 wish to have a filename portion that is not interpreted as a format string, you may need
-to escape portions of the filename, as shown below:
+to escape portions of the filename, as shown in the example below.
 
-Usage example:
+It is possible to pass a formatter function as the first argument to control the output.
+The formatting function should be of the form `f(io::IOContext, log_args::NamedTuple)`
+where `log_args` has the following fields:
+`(level, message, _module, group, id, file, line, kwargs)`.
+See `?LoggingExtra.handle_message_args` for more information about what each field represents.
 
-    logger = DatetimeRotatingFileLogger(log_dir, raw"\a\c\c\e\s\s-YYYY-mm-dd.\l\o\g")
+# Examples
+
+```julia
+# Logger that logs to a new file every day
+logger = DatetimeRotatingFileLogger(log_dir, raw"\a\c\c\e\s\s-yyyy-mm-dd.\l\o\g")
+
+# Logger with a formatter function that rotates the log file hourly
+logger = DatetimeRotatingFileLogger(log_dir, raw"yyyy-mm-dd-HH.\l\o\g") do io, args
+    println(io, args.level, " | ", args.message)
+end
 """
 mutable struct DatetimeRotatingFileLogger <: AbstractLogger
-    logger::SimpleLogger
+    logger::Union{SimpleLogger,FormatLogger}
     dir::String
     filename_pattern::DateFormat
     next_reopen_check::DateTime
@@ -23,18 +38,28 @@ mutable struct DatetimeRotatingFileLogger <: AbstractLogger
 end
 
 function DatetimeRotatingFileLogger(dir, filename_pattern; always_flush=true)
-    format = DateFormat(filename_pattern)
-    return DatetimeRotatingFileLogger(
-        SimpleLogger(open(calc_logpath(dir, filename_pattern), "a"), BelowMinLevel),
-        dir,
-        format,
-        next_datetime_transition(format),
-        always_flush,
-    )
+    DatetimeRotatingFileLogger(nothing, dir, filename_pattern; always_flush=always_flush)
+end
+function DatetimeRotatingFileLogger(f::Union{Function,Nothing}, dir, filename_pattern; always_flush=true)
+    # Construct the backing logger with a temp IOBuffer that will be replaced
+    # by the correct filestream in the call to reopen! below
+    logger = if f === nothing
+        SimpleLogger(IOBuffer(), BelowMinLevel)
+    else # f isa Function
+        FormatLogger(f, IOBuffer(); always_flush=false) # no need to flush twice
+    end
+    # abspath in case user constructs the logger with a relative path and later cd's.
+    drfl = DatetimeRotatingFileLogger(logger, abspath(dir),
+        DateFormat(filename_pattern), now(), always_flush)
+    reopen!(drfl)
+    return drfl
 end
 
+similar_logger(::SimpleLogger, io) = SimpleLogger(io, BelowMinLevel)
+similar_logger(l::FormatLogger, io) = FormatLogger(l.f, io, l.always_flush)
 function reopen!(drfl::DatetimeRotatingFileLogger)
-    drfl.logger = SimpleLogger(open(calc_logpath(drfl.dir, drfl.filename_pattern), "a"), BelowMinLevel)
+    io = open(calc_logpath(drfl.dir, drfl.filename_pattern), "a")
+    drfl.logger = similar_logger(drfl.logger, io)
     drfl.next_reopen_check = next_datetime_transition(drfl.filename_pattern)
     return nothing
 end
