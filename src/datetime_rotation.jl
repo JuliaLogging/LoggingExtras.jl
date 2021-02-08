@@ -2,13 +2,13 @@ using Dates
 import Base: isless
 
 raw"""
-    DatetimeRotatingFileLogger(dir, file_pattern; always_flush=true)
-    DatetimeRotatingFileLogger(f::Function, dir, file_pattern; always_flush=true)
+    DatetimeRotatingFileLogger(dir, file_pattern; always_flush=true, rotation_callback=identity)
+    DatetimeRotatingFileLogger(f::Function, dir, file_pattern; always_flush=true, rotation_callback=identity)
 
 Construct a `DatetimeRotatingFileLogger` that rotates its file based on the current date.
 The constructor takes a log output directory, `dir`, and a filename pattern.
 The filename pattern given is interpreted through the `Dates.format()` string formatter,
-allowing for yearly all the way down to millisecond-level log rotation.  Note that if you
+allowing for yearly all the way down to minute-level log rotation.  Note that if you
 wish to have a filename portion that is not interpreted as a format string, you may need
 to escape portions of the filename, as shown in the example below.
 
@@ -17,6 +17,11 @@ The formatting function should be of the form `f(io::IOContext, log_args::NamedT
 where `log_args` has the following fields:
 `(level, message, _module, group, id, file, line, kwargs)`.
 See `?LoggingExtra.handle_message_args` for more information about what each field represents.
+
+It is also possible to pass `rotation_callback::Function` as a keyword argument. This function
+will be called every time a file rotation is happening. The function should accept one
+argument which is the absolute path to the just-rotated file. The logger will block until
+the callback function returns. Use `@async` if the callback is expensive.
 
 # Examples
 
@@ -28,6 +33,11 @@ logger = DatetimeRotatingFileLogger(log_dir, raw"\a\c\c\e\s\s-yyyy-mm-dd.\l\o\g"
 logger = DatetimeRotatingFileLogger(log_dir, raw"yyyy-mm-dd-HH.\l\o\g") do io, args
     println(io, args.level, " | ", args.message)
 end
+
+# Example callback function to compress the recently-closed file
+compressor(file) = run(`gzip $(file)`)
+logger = DatetimeRotatingFileLogger(...; rotation_callback=compressor)
+```
 """
 mutable struct DatetimeRotatingFileLogger <: AbstractLogger
     logger::Union{SimpleLogger,FormatLogger}
@@ -35,12 +45,15 @@ mutable struct DatetimeRotatingFileLogger <: AbstractLogger
     filename_pattern::DateFormat
     next_reopen_check::DateTime
     always_flush::Bool
+    reopen_lock::ReentrantLock
+    current_file::Union{String,Nothing}
+    rotation_callback::Function
 end
 
-function DatetimeRotatingFileLogger(dir, filename_pattern; always_flush=true)
-    DatetimeRotatingFileLogger(nothing, dir, filename_pattern; always_flush=always_flush)
+function DatetimeRotatingFileLogger(dir, filename_pattern; always_flush=true, rotation_callback=identity)
+    DatetimeRotatingFileLogger(nothing, dir, filename_pattern; always_flush=always_flush, rotation_callback=rotation_callback)
 end
-function DatetimeRotatingFileLogger(f::Union{Function,Nothing}, dir, filename_pattern; always_flush=true)
+function DatetimeRotatingFileLogger(f::Union{Function,Nothing}, dir, filename_pattern; always_flush=true, rotation_callback=identity)
     # Construct the backing logger with a temp IOBuffer that will be replaced
     # by the correct filestream in the call to reopen! below
     logger = if f === nothing
@@ -50,7 +63,7 @@ function DatetimeRotatingFileLogger(f::Union{Function,Nothing}, dir, filename_pa
     end
     # abspath in case user constructs the logger with a relative path and later cd's.
     drfl = DatetimeRotatingFileLogger(logger, abspath(dir),
-        DateFormat(filename_pattern), now(), always_flush)
+        DateFormat(filename_pattern), now(), always_flush, ReentrantLock(), nothing, rotation_callback)
     reopen!(drfl)
     return drfl
 end
@@ -58,7 +71,14 @@ end
 similar_logger(::SimpleLogger, io) = SimpleLogger(io, BelowMinLevel)
 similar_logger(l::FormatLogger, io) = FormatLogger(l.f, io, l.always_flush)
 function reopen!(drfl::DatetimeRotatingFileLogger)
-    io = open(calc_logpath(drfl.dir, drfl.filename_pattern), "a")
+    if drfl.current_file !== nothing
+        # close the old IOStream and pass the file to the callback
+        close(drfl.logger.stream)
+        drfl.rotation_callback(drfl.current_file)
+    end
+    new_file = calc_logpath(drfl.dir, drfl.filename_pattern)
+    drfl.current_file = new_file
+    io = open(new_file, "a")
     drfl.logger = similar_logger(drfl.logger, io)
     drfl.next_reopen_check = next_datetime_transition(drfl.filename_pattern)
     return nothing
@@ -104,15 +124,19 @@ function next_datetime_transition(fmt::DateFormat)
 
     tokens = filter(t -> isa(t, Dates.DatePart), collect(fmt.tokens))
     minimum_timescale = first(sort(map(t -> token_timescales[extract_token(t)], tokens), lt=custom_isless))
-    return ceil(now(), minimum_timescale) - Second(1)
+    if minimum_timescale < Minute(1)
+        throw(ArgumentError("rotating the logger with sub-minute resolution not supported"))
+    end
+    return ceil(now(), minimum_timescale)
 end
 
 calc_logpath(dir, filename_pattern) = joinpath(dir, Dates.format(now(), filename_pattern))
 
 function handle_message(drfl::DatetimeRotatingFileLogger, args...; kwargs...)
-    if now() >= drfl.next_reopen_check
-        flush(drfl.logger.stream)
-        reopen!(drfl)
+    lock(drfl.reopen_lock) do
+        if now() >= drfl.next_reopen_check
+            reopen!(drfl)
+        end
     end
     handle_message(drfl.logger, args...; kwargs...)
     drfl.always_flush && flush(drfl.logger.stream)

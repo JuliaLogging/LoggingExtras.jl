@@ -316,6 +316,9 @@ julia> filter(f -> endswith(f, ".log"), readdir(pwd()))
 ```
 
 The user implicitly controls when the files will be rolled over based on the `DateFormat` given.
+To post-process the newly rotated file pass `rotation_callback::Function` as a keyword argument.
+See the docstring with (`?DatetimeRotatingFileLogger` in the REPL) for more details.
+
 To control the logging output it is possible to pass a formatter function as the first argument
 in the constructor. See `FormatLogger` for the requirements on the formatter function.
 
