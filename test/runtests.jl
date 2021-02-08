@@ -124,41 +124,52 @@ end
 
 @testset "DatetimeRotatingFileLogger" begin
     mktempdir() do dir
-        drfl_sec = DatetimeRotatingFileLogger(dir, raw"\s\e\c-YYYY-mm-dd-HH-MM-SS.\l\o\g")
         drfl_min = DatetimeRotatingFileLogger(dir, raw"\m\i\n-YYYY-mm-dd-HH-MM.\l\o\g")
+        drfl_hour = DatetimeRotatingFileLogger(dir, raw"\h\o\u\r-YYYY-mm-dd-HH.\l\o\g")
         func = (io, args) -> println(io, reverse(args.message))
-        drfl_fmt = DatetimeRotatingFileLogger(func, dir, raw"\f\m\t-YYYY-mm-dd-HH-MM-SS.\l\o\g")
+        drfl_fmt = DatetimeRotatingFileLogger(func, dir, raw"\f\m\t-YYYY-mm-dd-HH-MM.\l\o\g")
+        callback_record = []
+        callback(f) = filesize(f) > 0 && push!(callback_record, f)
+        drfl_cb = DatetimeRotatingFileLogger(dir, raw"\c\o\m\p-YYYY-mm-dd-HH-MM.\l\o\g";
+                                             rotation_callback=callback)
 
-        sink = TeeLogger(drfl_sec, drfl_min, drfl_fmt)
+        sink = TeeLogger(drfl_min, drfl_hour, drfl_fmt, drfl_cb)
         with_logger(sink) do
-            while millisecond(now()) < 100 || millisecond(now()) > 200
-                sleep(0.001)
-            end
+            # Make sure to trigger one minute-level rotation and no hour-level
+            # rotation by sleeping until HH:MM:55
+            n = now()
+            sleeptime = mod((55 - second(n)), 60)
+            minute(n) == 59 && (sleeptime += 60)
+            sleep(sleeptime)
             @info "first"
             @info "second"
-            sleep(0.9)
+            sleep(10) # Should rotate to next minute
             @info("third")
         end
 
         # Drop anything that's not a .log file or empty
         files = sort(map(f -> joinpath(dir, f), readdir(dir)))
         files = filter(f -> endswith(f, ".log") && filesize(f) > 0, files)
-        sec_files = filter(f -> startswith(basename(f), "sec-"), files)
-        @test length(sec_files) == 2
-
         min_files = filter(f -> startswith(basename(f), "min-"), files)
-        @test length(min_files) == 1
+        @test length(min_files) == 2
+
+        hour_files = filter(f -> startswith(basename(f), "hour-"), files)
+        @test length(hour_files) == 1
 
         fmt_files = filter(f -> startswith(basename(f), "fmt-"), files)
         @test length(fmt_files) == 2
 
-        sec1_data = String(read(sec_files[1]))
-        @test occursin("first", sec1_data)
-        @test occursin("second", sec1_data)
-        sec2_data = String(read(sec_files[2]))
-        @test occursin("third", sec2_data)
+        # Two files exist, but just one have been rotated
+        @test length(callback_record) == 1
+        @test occursin(r"comp-\d{4}(-\d{2}){4}\.log$", callback_record[1])
 
-        min_data = String(read(min_files[1]))
+        min1_data = String(read(min_files[1]))
+        @test occursin("first", min1_data)
+        @test occursin("second", min1_data)
+        min2_data = String(read(min_files[2]))
+        @test occursin("third", min2_data)
+
+        min_data = String(read(hour_files[1]))
         @test occursin("first", min_data)
         @test occursin("second", min_data)
         @test occursin("third", min_data)
@@ -168,6 +179,10 @@ end
         @test occursin("dnoces", fmt_data)
         fmt_data = String(read(fmt_files[2]))
         @test occursin("driht", fmt_data)
+
+        # Sub-minute resolution not allowed
+        @test_throws(ArgumentError("rotating the logger with sub-minute resolution not supported"),
+                     DatetimeRotatingFileLogger(dir, "HH-MM-SS"))
     end
 end
 
