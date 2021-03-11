@@ -153,7 +153,7 @@ see the HTTP example below.
 Another example is using them to stop messages every being repeated within a given time period.
 
 ```julia
-using Dates, Logging, LoggingExtras
+using Dates, LoggingExtras
 
 julia> function make_throttled_logger(period)
     history = Dict{Symbol, DateTime}()
@@ -195,7 +195,7 @@ that just checks if the level of the message is above the level specified when i
 ### Demo: filter out all the log messages that are less severe than `Error`
 
 ```julia
-julia> using Logging, LoggingExtras
+julia> using LoggingExtras
 
 julia> error_only_logger = MinLevelLogger(current_logger(), Logging.Error);
 
@@ -221,7 +221,7 @@ and should return a new modified named tuple.
 A simple example of its use is truncating messages.
 
 ```julia
-julia> using Logging, LoggingExtras
+julia> using LoggingExtras
 
 julia> truncating_logger  = TransformerLogger(global_logger()) do log
     if length(log.message) > 128
@@ -262,7 +262,7 @@ We are going to log info and above to one file,
 and warnings and above to another.
 
 ```julia
-julia> using Logging; using LoggingExtras;
+julia> using LoggingExtras;
 
 julia> demux_logger = TeeLogger(
     MinLevelLogger(FileLogger("info.log"), Logging.Info),
@@ -298,7 +298,7 @@ when the `DateFormat` would change the filename.  Note that if you wish to have 
 escape them so they are not interpreted by the `DateFormat` code.  Example:
 
 ```julia
-julia> using Logging, LoggingExtras
+julia> using LoggingExtras
 
 julia> rotating_logger = DatetimeRotatingFileLogger(pwd(), raw"\a\c\c\e\s\s-YYYY-mm-dd-HH-MM-SS.\l\o\g");
 
@@ -326,7 +326,7 @@ The `FormatLogger` is a sink that formats the message and prints to a wrapped IO
 Formatting is done by providing a function `f(io::IO, log_args::NamedTuple)`.
 
 ```julia
-julia> using Logging, LoggingExtras
+julia> using LoggingExtras
 
 julia> logger = FormatLogger() do io, args
            println(io, args._module, " | ", "[", args.level, "] ", args.message)
@@ -346,7 +346,6 @@ Main | [Warn] This is a warning, should take a look.
 
 ```julia
 using LoggingExtras
-using Logging
 
 function sensible_message_filter(log)
     length(log.message) < 1028
@@ -360,7 +359,6 @@ global_logger(ActiveFilteredLogger(sensible_message_filter, global_logger()))
 
 ```julia
 using LoggingExtras
-using Logging
 using HTTP
 
 function not_HTTP_message_filter(log)
@@ -374,7 +372,6 @@ global_logger(EarlyFilteredLogger(not_HTTP_message_filter, global_logger()))
 
 ```julia
 using LoggingExtras
-using Logging
 using HTTP
 
 transformer_logger(global_logger()) do log
@@ -393,7 +390,7 @@ global_logger(transformer_logger)
 ## Add timestamp to all logging
 
 ```julia
-using Logging, LoggingExtras, Dates
+using LoggingExtras, Dates
 
 const date_format = "yyyy-mm-dd HH:MM:SS"
 

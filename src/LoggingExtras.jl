@@ -18,7 +18,7 @@ export TeeLogger, TransformerLogger, FileLogger,
 # https://github.com/JuliaLang/julia/blob/release-1.6/stdlib/Logging/src/Logging.jl#L32-L46
 using Logging
 
-export AbstractLogger, LogLevel, NullLogger,
+export Logging, AbstractLogger, LogLevel, NullLogger,
     @debug, @info, @warn, @error, @logmsg,
     with_logger, current_logger, global_logger, disable_logging,
     SimpleLogger, ConsoleLogger
