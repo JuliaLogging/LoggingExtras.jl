@@ -16,8 +16,7 @@ export TeeLogger, TransformerLogger, FileLogger,
 # Re export Logging.jl from stdlib 
 # list is stable between julia 1.0 and 1.6
 # https://github.com/JuliaLang/julia/blob/release-1.6/stdlib/Logging/src/Logging.jl#L32-L46
-import Logging: @debug, @info, @warn, @error, @logmsg,
-    with_logger, current_logger, disable_logging, ConsoleLogger
+using Logging
 
 export AbstractLogger, LogLevel, NullLogger,
     @debug, @info, @warn, @error, @logmsg,

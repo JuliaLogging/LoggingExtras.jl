@@ -50,8 +50,7 @@ ConsoleLogger(stream, min_level) =
 
 # Usage
 Load the package with `using LoggingExtras`.
-You likely also want to load the `Logging` standard lib.
-Loggers can be constructed and used like normal.
+For convenience, this also re-exports the `Logging` standard library.
 
 
 ### Basics of working with loggers
