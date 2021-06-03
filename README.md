@@ -300,18 +300,18 @@ escape them so they are not interpreted by the `DateFormat` code.  Example:
 ```julia
 julia> using LoggingExtras
 
-julia> rotating_logger = DatetimeRotatingFileLogger(pwd(), raw"\a\c\c\e\s\s-YYYY-mm-dd-HH-MM-SS.\l\o\g");
+julia> rotating_logger = DatetimeRotatingFileLogger(pwd(), raw"\a\c\c\e\s\s-YYYY-mm-dd-HH-MM.\l\o\g");
 
 julia> with_logger(rotating_logger) do
        @info("This goes in one file")
-       sleep(1.1)
+       sleep(61) # Sleep until next minute
        @info("This goes in another file")
        end
 
 julia> filter(f -> endswith(f, ".log"), readdir(pwd()))
 2-element Array{String,1}:
- "access-2020-07-13-13-24-13.log"
- "access-2020-07-13-13-24-14.log"
+ "access-2020-07-13-13-24.log"
+ "access-2020-07-13-13-25.log"
 ```
 
 The user implicitly controls when the files will be rolled over based on the `DateFormat` given.
