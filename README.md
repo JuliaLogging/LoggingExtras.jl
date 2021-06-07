@@ -362,7 +362,8 @@ using LoggingExtras
 using HTTP
 
 function not_HTTP_message_filter(log)
-    log._module != HTTP
+    # HTTP.jl utilizes internal modules so call parentmodule(...)
+    parentmodule(log._module) !== HTTP
 end
 
 global_logger(EarlyFilteredLogger(not_HTTP_message_filter, global_logger()))
@@ -375,7 +376,8 @@ using LoggingExtras
 using HTTP
 
 transformer_logger(global_logger()) do log
-    if log._module == HTTP && log.level=Logging.Debug
+    # HTTP.jl utilizes internal modules so call parentmodule(...)
+    if parentmodule(log._module) === HTTP && log.level === Logging.Debug
         # Merge can be used to construct a new NamedTuple
         # which effectively is the overwriting of fields of a NamedTuple
         return merge(log, (; level=Logging.Info))
