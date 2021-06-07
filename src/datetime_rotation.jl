@@ -1,16 +1,17 @@
 using Dates
-import Base: isless
 
 raw"""
     DatetimeRotatingFileLogger(dir, file_pattern; always_flush=true, rotation_callback=identity)
     DatetimeRotatingFileLogger(f::Function, dir, file_pattern; always_flush=true, rotation_callback=identity)
 
 Construct a `DatetimeRotatingFileLogger` that rotates its file based on the current date.
-The constructor takes a log output directory, `dir`, and a filename pattern.
-The filename pattern given is interpreted through the `Dates.format()` string formatter,
-allowing for yearly all the way down to minute-level log rotation.  Note that if you
-wish to have a filename portion that is not interpreted as a format string, you may need
-to escape portions of the filename, as shown in the example below.
+The constructor takes a log output directory, `dir`, and a filename pattern. The smallest
+time resolution in the format string determines the frequency of log file rotation,
+allowing for yearly all the way down to minute-level log rotation.
+
+The pattern can be given as a string or as a `Dates.DateFormat`. Note that if you
+wish to have a filename portion that should not be interpreted as a format string, you may
+need to escape portions of the filename, as shown in the example below.
 
 It is possible to pass a formatter function as the first argument to control the output.
 The formatting function should be of the form `f(io::IOContext, log_args::NamedTuple)`
@@ -61,9 +62,10 @@ function DatetimeRotatingFileLogger(f::Union{Function,Nothing}, dir, filename_pa
     else # f isa Function
         FormatLogger(f, IOBuffer(); always_flush=false) # no need to flush twice
     end
+    filename_pattern isa DateFormat || (filename_pattern = DateFormat(filename_pattern))
     # abspath in case user constructs the logger with a relative path and later cd's.
     drfl = DatetimeRotatingFileLogger(logger, abspath(dir),
-        DateFormat(filename_pattern), now(), always_flush, ReentrantLock(), nothing, rotation_callback)
+        filename_pattern, now(), always_flush, ReentrantLock(), nothing, rotation_callback)
     reopen!(drfl)
     return drfl
 end
