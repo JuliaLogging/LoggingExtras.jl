@@ -377,7 +377,7 @@ using HTTP
 
 transformer_logger(global_logger()) do log
     # HTTP.jl utilizes internal modules so call parentmodule(...)
-    if parentmodule(log._module) === HTTP && log.level === Logging.Debug
+    if (log._module === HTTP || parentmodule(log._module) === HTTP) && log.level === Logging.Debug
         # Merge can be used to construct a new NamedTuple
         # which effectively is the overwriting of fields of a NamedTuple
         return merge(log, (; level=Logging.Info))
