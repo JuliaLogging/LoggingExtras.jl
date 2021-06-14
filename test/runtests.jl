@@ -183,6 +183,12 @@ end
         # Sub-minute resolution not allowed
         @test_throws(ArgumentError("rotating the logger with sub-minute resolution not supported"),
                      DatetimeRotatingFileLogger(dir, "HH-MM-SS"))
+
+        # Test constructors with pattern as a DateFormat
+        l = DatetimeRotatingFileLogger(dir, raw"yyyy-mm-dd.\l\o\g")
+        l1 = DatetimeRotatingFileLogger(dir, dateformat"yyyy-mm-dd.\l\o\g")
+        l2 = DatetimeRotatingFileLogger(identity, dir, dateformat"yyyy-mm-dd.\l\o\g")
+        @test l.filename_pattern == l1.filename_pattern == l2.filename_pattern
     end
 end
 
