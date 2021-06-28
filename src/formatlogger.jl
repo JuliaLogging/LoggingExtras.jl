@@ -12,7 +12,7 @@ Logger sink that formats the message and finally writes to `io`.
 The formatting function should be of the form `f(io::IOContext, log_args::NamedTuple)`
 where `log_args` has the following fields:
 `(level, message, _module, group, id, file, line, kwargs)`.
-See `?LoggingExtra.handle_message_args` for more information on what field is.
+See [`LoggingExtras.handle_message_args`](@ref) for more information on what field is.
 
 # Examples
 ```julia-repl

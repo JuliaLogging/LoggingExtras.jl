@@ -1,6 +1,6 @@
 using Dates
 
-raw"""
+@doc raw"""
     DatetimeRotatingFileLogger(dir, file_pattern; always_flush=true, rotation_callback=identity)
     DatetimeRotatingFileLogger(f::Function, dir, file_pattern; always_flush=true, rotation_callback=identity)
 
@@ -17,7 +17,7 @@ It is possible to pass a formatter function as the first argument to control the
 The formatting function should be of the form `f(io::IOContext, log_args::NamedTuple)`
 where `log_args` has the following fields:
 `(level, message, _module, group, id, file, line, kwargs)`.
-See `?LoggingExtra.handle_message_args` for more information about what each field represents.
+See [`LoggingExtras.handle_message_args`](@ref) for more information about what each field represents.
 
 It is also possible to pass `rotation_callback::Function` as a keyword argument. This function
 will be called every time a file rotation is happening. The function should accept one

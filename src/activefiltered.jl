@@ -17,7 +17,7 @@ The `filter` should be a function that returns a boolean.
 `true` if the message should be logged and `false` if not.
 As input it will be given a named tuple with the following fields:
 `(level, message, _module, group, id, file, line, kwargs)`
-See `?LoggingExtra.handle_message_args` for more information on what each is.
+See [`LoggingExtras.handle_message_args`](@ref) for more information on what each is.
 """
 struct ActiveFilteredLogger{T <: AbstractLogger, F} <: AbstractLogger
     filter::F
