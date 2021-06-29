@@ -9,7 +9,7 @@ to conditionally change the log level of logs from a given module
 The transforming function `f` is given a named tuple with the fields:
 `(level, message, _module, group, id, file, line, kwargs)`
 and should return the same.
-See `?LoggingExtra.handle_message_args` for more information on what each is.
+See [`LoggingExtras.handle_message_args`](@ref) for more information on what each is.
 """
 struct TransformerLogger{T<:AbstractLogger, F} <: AbstractLogger
     transform::F

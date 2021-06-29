@@ -13,7 +13,7 @@ The `filter` should be a function that returns a boolean.
 `true` if the message should be logged and `false` if not.
 As input it will be given a named tuple with the following fields:
 `(level, _module, group, id)`
-See `?LoggingExtra.shouldlog_args` for more information on what each is.
+See [`LoggingExtras.shouldlog_args`](@ref) for more information on what each is.
 """
 struct EarlyFilteredLogger{T <: AbstractLogger, F} <: AbstractLogger
     filter::F
