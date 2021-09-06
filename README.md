@@ -349,12 +349,19 @@ The max length which is not yet truncated is setup as a parameter of the constru
 julia> using LoggingExtras
 
 julia> with_logger(TruncatingSimpleLogger(stdout, Logging.Info, 30)) do
-           long_var = "a"^50
-           @info "a_message" long_var
-       end
-┌ Info: a_message
+    short_var = "a"^5
+    long_var = "a"^50
+    @info "a short message" short_var long_var
+    @info "a very long message"^20 short_var long_var
+end
+┌ Info: a short message
+│   short_var = aaaaa
 │   long_var = aaaaaaaaaaaa…
-└ @ Main REPL[43]:3
+└ @ Main REPL[46]:4
+┌ Info: a very long messagea very lon…
+│   short_var = aaaaa
+│   long_var = aaaaaaaaaaaa…
+└ @ Main REPL[46]:5
 ```
 
 # More Examples
