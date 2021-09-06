@@ -93,6 +93,7 @@ All of them, except `FormatLogger`, just wrap existing loggers.
  - The `FileLogger` is a simple logger sink that writes to file.
  - The `DatetimeRotatingFileLogger` is a logger sink that writes to file, rotating logs based upon a user-provided `DateFormat`.
  - The `FormatLogger` is a logger sink that simply formats the message and writes to the logger stream.
+ - The `TruncatingSimpleLogger` is a variant of `SimpleLogger` which truncates string representation of all variables it prints.
 
 By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
@@ -338,6 +339,22 @@ julia> with_logger(logger) do
        end
 Main | [Info] This is an informational message.
 Main | [Warn] This is a warning, should take a look.
+```
+
+## `TruncatingSimpleLogger` (*Sink*)
+The `TruncatingSimpleLogger` is a sink that truncates the message and all variables string representations and prints to a wrapped IO.
+The max length which is not yet truncated is setup as a parameter of the constructor.
+
+```julia
+julia> using LoggingExtras
+
+julia> with_logger(TruncatingSimpleLogger(stdout, Logging.Info, 30)) do
+           long_var = "a"^50
+           @info "a_message" long_var
+       end
+┌ Info: a_message
+│   long_var = aaaaaaaaaaaa…
+└ @ Main REPL[43]:3
 ```
 
 # More Examples
