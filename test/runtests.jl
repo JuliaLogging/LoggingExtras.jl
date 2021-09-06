@@ -244,3 +244,36 @@ end
         @test Set(demux_logger.loggers) == Set([testlogger])
     end
 end
+
+@testset "Truncating" begin
+    io = IOBuffer()
+    truncating_logger = TruncatingSimpleLogger(io, Logging.Info, 30)
+    with_logger(truncating_logger) do
+        @info "a"^50
+    end
+    str = String(take!(io))
+
+    @test occursin("Info: aaaaaaaaaaaaaaaaaaaaaaaaaaaaa…", str)
+
+    io = IOBuffer()
+    truncating_logger = TruncatingSimpleLogger(io, Logging.Info, 30)
+    with_logger(truncating_logger) do
+        long_var = "a"^50
+        @info "a_message" long_var
+    end
+    str = String(take!(io))
+
+    @test occursin("│   long_var = aaaaaaaaaaaa…", str)
+
+    io = IOBuffer()
+    truncating_logger = TruncatingSimpleLogger(io, Logging.Info, 30)
+    with_logger(truncating_logger) do
+        long_var = "a"^50
+        short_var = "a"
+        @info "a_message" long_var short_var
+    end
+    str = String(take!(io))
+    
+    @test occursin("│   long_var = aaaaaaaaaaaa…", str)
+    @test occursin("│   short_var = a", str)
+end
