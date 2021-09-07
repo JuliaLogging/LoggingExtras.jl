@@ -10,7 +10,7 @@ import Base.CoreLogging:
 
 export TeeLogger, TransformerLogger, FileLogger,
     ActiveFilteredLogger, EarlyFilteredLogger, MinLevelLogger,
-    DatetimeRotatingFileLogger, FormatLogger, TruncatingSimpleLogger
+    DatetimeRotatingFileLogger, FormatLogger
 
 ######
 # Re export Logging.jl from stdlib 

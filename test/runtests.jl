@@ -246,8 +246,9 @@ end
 end
 
 @testset "Truncating" begin
+    trunc_fun = LoggingExtras.make_log_truncated(30)
     io = IOBuffer()
-    truncating_logger = TruncatingSimpleLogger(io, Logging.Info, 30)
+    truncating_logger = FormatLogger(trunc_fun, io)
     with_logger(truncating_logger) do
         @info "a"^50
     end
@@ -256,7 +257,7 @@ end
     @test occursin("Info: aaaaaaaaaaaaaaaaaaaaaaaaaaaaa…", str)
 
     io = IOBuffer()
-    truncating_logger = TruncatingSimpleLogger(io, Logging.Info, 30)
+    truncating_logger = FormatLogger(trunc_fun, io)
     with_logger(truncating_logger) do
         long_var = "a"^50
         @info "a_message" long_var
@@ -266,7 +267,7 @@ end
     @test occursin("│   long_var = aaaaaaaaaaaa…", str)
 
     io = IOBuffer()
-    truncating_logger = TruncatingSimpleLogger(io, Logging.Info, 30)
+    truncating_logger = FormatLogger(trunc_fun, io)
     with_logger(truncating_logger) do
         long_var = "a"^50
         short_var = "a"

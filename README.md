@@ -341,29 +341,6 @@ Main | [Info] This is an informational message.
 Main | [Warn] This is a warning, should take a look.
 ```
 
-## `TruncatingSimpleLogger` (*Sink*)
-The `TruncatingSimpleLogger` is a sink that truncates the message and all variables string representations and prints to a wrapped IO.
-The max length which is not yet truncated is setup as a parameter of the constructor.
-
-```julia
-julia> using LoggingExtras
-
-julia> with_logger(TruncatingSimpleLogger(stdout, Logging.Info, 30)) do
-    short_var = "a"^5
-    long_var = "a"^50
-    @info "a short message" short_var long_var
-    @info "a very long message"^20 short_var long_var
-end
-┌ Info: a short message
-│   short_var = aaaaa
-│   long_var = aaaaaaaaaaaa…
-└ @ Main REPL[46]:4
-┌ Info: a very long messagea very lon…
-│   short_var = aaaaa
-│   long_var = aaaaaaaaaaaa…
-└ @ Main REPL[46]:5
-```
-
 # More Examples
 
 ## Filter out any overly long messages
@@ -434,4 +411,28 @@ This will produce output similar to:
 └ @ Base loading.jl:1240
 ┌ Error: 2019-09-20 17:43:54 ErrorException("SearchLight validation error(s) for Translations.Translation")
 └ @ TranslationsController ~/Dropbox/Projects/LiteCMS/app/resources/translations/TranslationsController.jl:69
+```
+
+## Truncate long variables and messages
+
+The `FormatLogger` is quite general and can be used e.g. to truncate long variables.
+There is `LoggingExtras.make_log_truncated(max_var_len=5_000)` function which formats data in similar manner as `ConsoleLogger`, but with truncation of string representation when it exceeds `max_var_len`.
+
+```julia
+julia> using LoggingExtras
+
+julia> with_logger(FormatLogger(LoggingExtras.make_log_truncated(30))) do
+    short_var = "a"^5
+    long_var = "a"^50
+    @info "a short message" short_var long_var
+    @info "a very long message"^20 short_var long_var
+end
+┌ Info: a short message
+│   short_var = aaaaa
+│   long_var = aaaaaaaaaaaa…
+└ @ Main REPL[46]:4
+┌ Info: a very long messagea very lon…
+│   short_var = aaaaa
+│   long_var = aaaaaaaaaaaa…
+└ @ Main REPL[46]:5
 ```
