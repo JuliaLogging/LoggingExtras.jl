@@ -93,7 +93,6 @@ All of them, except `FormatLogger`, just wrap existing loggers.
  - The `FileLogger` is a simple logger sink that writes to file.
  - The `DatetimeRotatingFileLogger` is a logger sink that writes to file, rotating logs based upon a user-provided `DateFormat`.
  - The `FormatLogger` is a logger sink that simply formats the message and writes to the logger stream.
- - The `TruncatingSimpleLogger` is a variant of `SimpleLogger` which truncates string representation of all variables it prints.
 
 By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
