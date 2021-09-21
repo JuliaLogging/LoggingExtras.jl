@@ -363,7 +363,7 @@ using HTTP
 
 function not_HTTP_message_filter(log)
     # HTTP.jl utilizes internal modules so call parentmodule(...)
-    log.module !== HTTP && parentmodule(log._module) !== HTTP
+    log._module !== HTTP && parentmodule(log._module) !== HTTP
 end
 
 global_logger(EarlyFilteredLogger(not_HTTP_message_filter, global_logger()))
