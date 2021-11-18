@@ -41,7 +41,7 @@ catch_exceptions(logger::EarlyFilteredLogger) = catch_exceptions(logger.logger)
 This returns a NamedTuple containing all the arguments the logger gives
 to `shouldlog`
 It is passed to the early logger filter.
-These argument come from the logging macro (@info`, `@warn` etc).
+These argument come from the logging macro (`@info`, `@warn` etc).
 
   * `level::LogLevel` Warn, Info, etc,
   * `_module::Module` can be used to specify a different originating module from
