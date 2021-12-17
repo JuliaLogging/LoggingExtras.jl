@@ -144,7 +144,7 @@ An `ActiveFilterLogger` can be used to wrap another logger to obey `maxlog` dire
 similar to the `make_throttled_logger` example below,
 ```julia
 function make_maxlog_logger(logger)
-    counts = Dict{Symbol,Int}()
+    counts = Dict{Any,Int}()
     return ActiveFilteredLogger(logger) do log
         haskey(log.kwargs, :maxlog) || return true
         if !haskey(counts, log.id) || (counts[log.id] < log.kwargs[:maxlog])
