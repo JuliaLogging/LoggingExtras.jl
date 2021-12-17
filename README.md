@@ -146,10 +146,12 @@ similar to the `make_throttled_logger` example below,
 function make_maxlog_logger(logger)
     counts = Dict{Any,Int}()
     return ActiveFilteredLogger(logger) do log
-        haskey(log.kwargs, :maxlog) || return true
-        if !haskey(counts, log.id) || (counts[log.id] < log.kwargs[:maxlog])
-            # then we will log it, and update the corresponding count
-            counts[log.id] = get(counts, log.id, 0) + 1
+        maxlog = get(log.kwargs, :maxlog, nothing)
+        maxlog === nothing && return true # no limit
+        c = get(counts, log.id, 0)
+        if c < maxlog
+            # log this message and update the count
+            counts[log.id] = c + 1
             return true
         else
             return false
