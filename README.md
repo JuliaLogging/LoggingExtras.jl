@@ -138,6 +138,30 @@ end
 [ Info: Yo Dawg! it is all good
 ```
 
+### Respecting `maxlog` convention
+
+An `ActiveFilterLogger` can be used to wrap another logger to obey `maxlog` directives, for example,
+similar to the `make_throttled_logger` example below,
+```julia
+function make_maxlog_logger(logger)
+    counts = Dict{Any,Int}()
+    return ActiveFilteredLogger(logger) do log
+        maxlog = get(log.kwargs, :maxlog, nothing)
+        maxlog === nothing && return true # no limit
+        c = get(counts, log.id, 0)
+        if c < maxlog
+            # log this message and update the count
+            counts[log.id] = c + 1
+            return true
+        else
+            return false
+        end
+    end
+end
+```
+wraps another logger to filter logs that have already fired `maxlog` many times.
+See <https://docs.julialang.org/en/v1/stdlib/Logging/#Logging.@logmsg> for more on `maxlog`.
+
 ## `EarlyFilteredLogger` (*Filter*)
 
 The `EarlyFilteredLogger` is similar to the `ActiveFilteredLogger`,
