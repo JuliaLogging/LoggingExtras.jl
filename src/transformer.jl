@@ -25,7 +25,9 @@ function handle_message(transformer::TransformerLogger, args...; kwargs...)
     kwargs = new_log_args.kwargs
 
     if comp_handle_message_check(transformer.logger, args...; kwargs...)
-        handle_message(transformer.logger, args...; kwargs...)
+        return handle_message(transformer.logger, args...; kwargs...)
+    else
+        return MessageHandled(false)
     end
 end
 

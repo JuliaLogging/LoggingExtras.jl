@@ -24,6 +24,8 @@ end
 function handle_message(logger::EarlyFilteredLogger, args...; kwargs...)
     if comp_handle_message_check(logger.logger, args...; kwargs...)
         return handle_message(logger.logger, args...; kwargs...)
+    else
+        return MessageHandled(false)
     end
 end
 

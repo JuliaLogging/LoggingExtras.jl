@@ -19,11 +19,14 @@ function TeeLogger(loggers::Vararg{AbstractLogger})
 end
 
 function handle_message(demux::TeeLogger, args...; kwargs...)
+    handled = false
     for logger in demux.loggers
         if comp_handle_message_check(logger, args...; kwargs...)
-            handle_message(logger, args...; kwargs...)
+            resp = handle_message(logger, args...; kwargs...)
+            handled |= was_handled(resp)
         end
     end
+    return MessageHandled(handled)
 end
 
 function shouldlog(demux::TeeLogger, args...)

@@ -35,6 +35,7 @@ end
 function handle_message(filelogger::FileLogger, args...; kwargs...)
     handle_message(filelogger.logger, args...; kwargs...)
     filelogger.always_flush && flush(filelogger.logger.stream)
+    return MessageHandled(true)
 end
 shouldlog(filelogger::FileLogger, arg...) = true
 min_enabled_level(filelogger::FileLogger) = BelowMinLevel
