@@ -10,7 +10,10 @@ Create a logger sink that write messages to a file specified with `path`.
 To append to the file (rather than truncating the file first), use `append=true`.
 If `always_flush=true` the stream is flushed after every handled log message.
 
-Note that one should use `FormatLogger` instead to print to the file in a specific format.
+!!! note
+    `FileLogger` uses the same output formatting as `SimpleLogger`. Use a `FormatLogger`
+    instead of a `FileLogger` to control the output formatting.
+
 """
 function FileLogger(path; append=false, kwargs...)
     filehandle = open(path, append ? "a" : "w")
