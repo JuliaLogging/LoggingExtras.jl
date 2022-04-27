@@ -24,7 +24,10 @@ Create a logger sink that write messages to the `io::IOStream`. The stream
 is expected to be open and writeable.
 If `always_flush=true` the stream is flushed after every handled log message.
 
-Note that one should use `FormatLogger` instead to print to the file in a specific format.
+!!! note
+    `FileLogger` uses the same output formatting as `SimpleLogger`. Use a `FormatLogger`
+    instead of a `FileLogger` to control the output formatting.
+
 
 # Examples
 ```julia
