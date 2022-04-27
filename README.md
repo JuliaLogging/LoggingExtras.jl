@@ -362,7 +362,7 @@ julia> logger = FormatLogger() do io, args
            println(io, args._module, " | ", "[", args.level, "] ", args.message)
        end;
 
-julia> logger = FormatLogger("out.log") do io, args
+julia> logger = FormatLogger("out.log"; append=true) do io, args
             println(io, args._module, " | ", "[", args.level, "] ", args.message)
         end;
 
