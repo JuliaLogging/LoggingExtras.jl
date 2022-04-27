@@ -9,6 +9,8 @@ end
 Create a logger sink that write messages to a file specified with `path`.
 To append to the file (rather than truncating the file first), use `append=true`.
 If `always_flush=true` the stream is flushed after every handled log message.
+
+Note that one should use `FormatLogger` instead to print to the file in a specific format.
 """
 function FileLogger(path; append=false, kwargs...)
     filehandle = open(path, append ? "a" : "w")
@@ -21,6 +23,8 @@ end
 Create a logger sink that write messages to the `io::IOStream`. The stream
 is expected to be open and writeable.
 If `always_flush=true` the stream is flushed after every handled log message.
+
+Note that one should use `FormatLogger` instead to print to the file in a specific format.
 
 # Examples
 ```julia
