@@ -352,8 +352,8 @@ in the constructor. See `FormatLogger` for the requirements on the formatter fun
 The `FormatLogger` is a sink that formats the message and prints to a wrapped IO.
 Formatting is done by providing a function `f(io::IO, log_args::NamedTuple)`.
 
-The format logger can take as its second argument either the `IO` to be written to or the path
-of a file to be written to.
+`FormatLogger` can take as its second argument either a writeable `IO` or a filepath. The `append::Bool` keyword
+argument determines whether the file is opened in append mode (`"a"`) or truncate mode (`"w"`).
 
 ```julia
 julia> using LoggingExtras
