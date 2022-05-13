@@ -221,6 +221,22 @@ end
     logger = FormatLogger(x -> x; always_flush=false)
     @test logger.stream === stderr
     @test !logger.always_flush
+
+    # test file arguments
+    mktempdir() do dir
+        f = joinpath(dir, "test.log")
+
+        logger = FormatLogger(f) do io, args
+            println(io, "log message")
+        end
+
+        with_logger(logger) do
+            @info "test message"
+        end
+
+        l = read(f, String)
+        @test startswith(l, "log message")
+    end
 end
 
 @testset "Deprecations" begin

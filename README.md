@@ -281,6 +281,9 @@ It is really simple.
 The resulting file format is similar to that which is shown in the REPL.
 (Not identical, but similar)
 
+**NOTE**: To print to the file in a specific format, e.g. to create a JSON log, use
+`FormatLogger` instead.
+
 ### Demo: `TeeLogger` and `FileLogger`
 We are going to log info and above to one file,
 and warnings and above to another.
@@ -349,12 +352,19 @@ in the constructor. See `FormatLogger` for the requirements on the formatter fun
 The `FormatLogger` is a sink that formats the message and prints to a wrapped IO.
 Formatting is done by providing a function `f(io::IO, log_args::NamedTuple)`.
 
+`FormatLogger` can take as its second argument either a writeable `IO` or a filepath. The `append::Bool` keyword
+argument determines whether the file is opened in append mode (`"a"`) or truncate mode (`"w"`).
+
 ```julia
 julia> using LoggingExtras
 
 julia> logger = FormatLogger() do io, args
            println(io, args._module, " | ", "[", args.level, "] ", args.message)
        end;
+
+julia> logger = FormatLogger("out.log"; append=true) do io, args
+            println(io, args._module, " | ", "[", args.level, "] ", args.message)
+        end;
 
 julia> with_logger(logger) do
            @info "This is an informational message."

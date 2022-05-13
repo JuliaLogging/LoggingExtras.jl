@@ -34,6 +34,20 @@ function FormatLogger(f::Function, io::IO=stderr; always_flush=true)
     return FormatLogger(f, io, always_flush)
 end
 
+"""
+    FormatLogger(f::Function, path::AbstractString; append=false, always_flush=true)
+
+Logger sink that formats the message and writes it to the file at `path`.  This is similar
+to `FileLogger` except that it allows specifying the printing format.
+
+To append to the file (rather than truncating the file first), use `append=true`.
+If `always_flush=true` the stream is flushed after every handled log message.
+"""
+function FormatLogger(f::Function, path::AbstractString; append::Bool=false, kw...)
+    io = open(path, append ? "a" : "w")
+    return FormatLogger(f, io; kw...)
+end
+
 function handle_message(logger::FormatLogger, args...; kwargs...)
     log_args = handle_message_args(args...; kwargs...)
     # We help the user by passing an IOBuffer to the formatting function
