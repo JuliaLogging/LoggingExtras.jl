@@ -223,6 +223,81 @@ end
     @test !logger.always_flush
 end
 
+module Test2
+    using Logging
+    function run()
+        @debug "debug Test2"
+        @info "info Test2"
+    end
+end
+
+module Test1
+    using LoggingExtras
+    LoggingExtras.@setupdebuglogging()
+    function run()
+        @debug "debug Test1"
+        @debug2 "debug2 Test1"
+        @debug3 "debug3 Test1"
+    end
+
+    module SubTest1
+        using LoggingExtras
+        LoggingExtras.@setupdebuglogging()
+        function run()
+            @debug "debug SubTest1"
+            @debug2 "debug2 SubTest1"
+            @debug3 "debug3 SubTest1"
+        end
+    end
+end # module
+
+using .Test2, .Test1
+
+@testset "ModuleFilterLogger" begin
+    tl = TestLogger(min_level=Info)
+    # first test that logging works as expected w/ no ModuleFilterLogger
+    with_logger(tl) do
+        Test2.run()
+        Test1.run()
+    end
+    @test length(tl.logs) == 1
+    @test tl.logs[1].level == Info
+
+    # now test that logging works as expected w/ ModuleFilterLogger
+    tl = TestLogger(min_level=Info)
+    with_logger(tl) do
+        Test1.withloglevel(Debug) do
+            Test1.run()
+            Test2.run()
+            Test1.SubTest1.run()
+        end
+    end
+    # Test2 didn't debug log; only Test1; SubTest1 also didn't log even though run
+    @test length(tl.logs) == 2
+    @test tl.logs[1].level == Debug
+    @test tl.logs[1].message == "debug Test1"
+    @test tl.logs[2].level == Info
+    @test tl.logs[2].message == "info Test2"
+
+    # test nested ModuleFilterLogger
+    tl = TestLogger(min_level=Info)
+    with_logger(tl) do
+        Test1.withloglevel(Debug) do
+            Test1.SubTest1.withloglevel(Debug2) do
+                Test1.run()
+                Test1.SubTest1.run()
+            end
+        end
+    end
+    @test length(tl.logs) == 3
+    @test tl.logs[1].level == Debug
+    @test tl.logs[1].message == "debug Test1"
+    @test tl.logs[2].level == Debug
+    @test tl.logs[2].message == "debug SubTest1"
+    @test tl.logs[3].level == Debug2
+    @test tl.logs[3].message == "debug2 SubTest1"
+end
+
 @testset "Deprecations" begin
     testlogger = TestLogger(min_level=BelowMinLevel)
 

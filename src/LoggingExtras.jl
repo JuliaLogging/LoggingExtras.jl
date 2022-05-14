@@ -50,6 +50,7 @@ include("minlevelfiltered.jl")
 include("filelogger.jl")
 include("formatlogger.jl")
 include("datetime_rotation.jl")
+include("modulefilter.jl")
 include("deprecated.jl")
 
 end # module

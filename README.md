@@ -80,9 +80,9 @@ logger = global_logger()
 
 
 # Loggers introduced by this package:
-This package introduces 8 new loggers.
-The `TeeLogger`, the `TransformerLogger`, 3 types of filtered logger, the `FileLogger`,
-the `DatetimeRotatingFileLogger` and the `FormatLogger`.
+This package introduces 9 new loggers.
+The `TeeLogger`, the `TransformerLogger`, 4 types of filtered logger, the `FileLogger`,
+the `DatetimeRotatingFileLogger`, the `FormatLogger`, and the `ModuleFilterLogger`.
 All of them, except `FormatLogger`, just wrap existing loggers.
  - The `TeeLogger` sends the logs to multiple different loggers.
  - The 3 filter loggers are used to control if a message is written or not
@@ -93,6 +93,7 @@ All of them, except `FormatLogger`, just wrap existing loggers.
  - The `FileLogger` is a simple logger sink that writes to file.
  - The `DatetimeRotatingFileLogger` is a logger sink that writes to file, rotating logs based upon a user-provided `DateFormat`.
  - The `FormatLogger` is a logger sink that simply formats the message and writes to the logger stream.
+ - The `ModuleFilterLogger` filters the log level for a specific module and includes a few convenience methods for interactive debug logging
 
 By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
@@ -210,6 +211,34 @@ end
 └   ii = 7
 ┌ Info: It happened
 └   ii = 10
+```
+
+## `ModuleFilterLogger` (*Filter*)\
+This logger aims to allow precise control over the log level of a specific module.
+A few convenience methods are also provided to make interactive logging control easier.
+
+For example, the `LoggingExtras.@setupdebugloggin()` macro is provided that defines convenience
+methods for the encapsulating module, like:
+```julia
+module MyModule
+
+using LoggingExtras
+LoggingExtras.@setupdebuglogging()
+
+end
+```
+
+Which then allows using conveninence methods to automatically setup a `ModuleFilterLogger`, like:
+```julia
+using MyModule
+
+MyModule.setloglevel!(Debug) # set log level for MyModule to Debug
+
+MyModule.setloglevel!(Debug2) # increase debug logging verbosity for MyModule
+
+MyModule.withloglevel(Debug4) do
+    # do stuff where maximum debug logging verbosity will be turned on
+end
 ```
 
 ## `MinLevelLogger` (*Filter*)
