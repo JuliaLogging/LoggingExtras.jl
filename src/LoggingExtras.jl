@@ -53,7 +53,6 @@ include("formatlogger.jl")
 include("datetime_rotation.jl")
 include("overridelogger.jl")
 include("verbosity.jl")
-include("util.jl")
 include("deprecated.jl")
 
 end # module
