@@ -1,3 +1,10 @@
+"""
+    LevelOverrideLogger(level, logger)
+
+A logger that allows overriding the log level of a child level.
+Useful in debugging scenarios, where it is desirable to ignore
+the log level any other logger may have set.
+"""
 struct LevelOverrideLogger{T <: AbstractLogger} <: AbstractLogger
     level::LogLevel
     logger::T
