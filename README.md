@@ -370,6 +370,7 @@ Allows overriding the minimum log level set by the logger it wraps.
 Useful when debug logging
 and used in conjuction with `Logging.with_logger` or `LoggingExtras.with` to
 temporarily modify the current logger with a custom level.
+More generally useful if you want to use the current/global logger as a _sink_ but don't know if it is going to have a problematically high min log level set (as julia's default logger sets min level to `Info`).
 
 ```julia
 julia> using LoggingExtras
