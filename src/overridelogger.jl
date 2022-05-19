@@ -15,6 +15,7 @@ handle_message(logger::LevelOverrideLogger, args...; kwargs...) =
     handle_message(logger.logger, args...; kwargs...)
 
 function shouldlog(logger::LevelOverrideLogger, level, args...)
+    # Ignore the logger.logger's own level and instead check the override level
     level >= logger.level && shouldlog(logger.logger, level, args...)
 end
 
