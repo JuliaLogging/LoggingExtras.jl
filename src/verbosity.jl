@@ -27,35 +27,35 @@ For convenience, the
 wrap the current logger with a level/verbosity filter while `f` is executed.
 """
 
-macro debugv(verbosity::Int64, msg, exs...)
+macro debugv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@debug $msg _group=$verbosity $(exs...))),
         __source__,
     )
 end
 
-macro infov(verbosity::Int64, msg, exs...)
+macro infov(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@info $msg _group=$verbosity $(exs...))),
         __source__,
     )
 end
 
-macro warnv(verbosity::Int64, msg, exs...)
+macro warnv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@warn $msg _group=$verbosity $(exs...))),
         __source__,
     )
 end
 
-macro errorv(verbosity::Int64, msg, exs...)
+macro errorv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@error $msg _group=$verbosity $(exs...))),
         __source__,
     )
 end
 
-macro logmsgv(verbosity::Int64, level, msg, exs...)
+macro logmsgv(verbosity::Int, level, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@logmsg $level $msg _group=$verbosity $(exs...))),
         __source__,
