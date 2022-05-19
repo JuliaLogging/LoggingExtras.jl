@@ -17,7 +17,9 @@ vlogmacrodocs = """
 additional verbosity level `N` is passed to indicate differing verbosity levels
 for a given log level. The verbosity argument is passed as the `group` argument
 to the core logging logic, so care should be taken if other loggers are being used
-that also use the group argument (which by default is passed the source file).
+that also use the group argument.
+Note: by default group is passed as the source file, however it is poor practice to rely on this in the first place.
+Instead use the file argument for that.
 
 The default logger doesn't have support for filtering on the `group` argument,
 so an `LoggingExtras.EarlyFilteredLogger` can be used. For convenience, a
