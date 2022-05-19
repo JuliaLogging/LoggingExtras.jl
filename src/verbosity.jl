@@ -21,8 +21,8 @@ that also use the group argument.
 Note: by default group is passed as the source file, however it is poor practice to rely on this in the first place.
 Instead use the file argument for that.
 
-The default logger doesn't have support for filtering on the `group` argument,
-so an `LoggingExtras.EarlyFilteredLogger` can be used. For convenience, a
+An `LoggingExtras.EarlyFilteredLogger`can then be used to filter on the `group` argument.
+For convenience, the
 [`LoggintExtras.with(f; level, verbosity)`](@ref) function is provided to temporarily
 wrap the current logger with a level/verbosity filter while `f` is executed.
 """
