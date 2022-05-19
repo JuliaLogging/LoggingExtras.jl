@@ -381,6 +381,9 @@ julia> with_logger(logger) do
 ┌ Debug: This message will log since we're overriding the global Info default log level
 └ @ Main REPL[33]:2
 ```
+This is roughly complementary to the `MinLevelFilterLogger`.
+The `MinLevelFilterLogger` lets you effectively *raise* the level of any logger it wraps to meet the level you specify.
+The `LevelOverrideLogger` lets you *lower* (or *raise*) the level of the wrapped logger as it bypasses checks on it entirely.
 
 # Utilities
 
