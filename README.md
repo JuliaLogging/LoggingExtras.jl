@@ -401,7 +401,7 @@ non-verbose counterparts, but allow specifying a verbosity level as well:
 
 For verbosity filtering, the `LoggingExtras.with(f; level=Info, verbosity=0)` utlility is provided
 for temporarily (i.e. while `f()` is executed) allowing log messages with `level` and `verbosity`.
-This is very handy for allowing control in debug logging for long-running or complex user API function
+This is very handy for allowing finer grained control in debug logging for long-running or complex user API function
 calls. For example:
 
 ```julia
