@@ -366,7 +366,8 @@ Main | [Warn] This is a warning, should take a look.
 ```
 
 ## `LevelOverrideLogger` (*Filter*)
-Allows overriding the log level set by any nested logger. Useful when debug logging
+Allows overriding the minimum log level set by the logger it wraps.
+Useful when debug logging
 and used in conjuction with `Logging.with_logger` or `LoggingExtras.with` to
 temporarily modify the current logger with a custom level.
 
