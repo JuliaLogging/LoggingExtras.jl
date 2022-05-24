@@ -390,7 +390,7 @@ The `LevelOverrideLogger` lets you *lower* (or *raise*) the level of the wrapped
 # Utilities
 
 ## Verbosity macros
-Sometimes when logging, it is desirable to be able to specify a verbosity level in addition to
+Sometimes when logging, it is desirable to be able to specify a verbosity level along with
 the log level, and to be able to filter on verbosity levels. For example, you may want multiple levels
 of verbosity for `Debug` log statements. LoggingExtras.jl exports verbosity macros that act like their
 non-verbose counterparts, but allow specifying a verbosity level as well:

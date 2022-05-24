@@ -239,7 +239,7 @@ end
     with_logger(logger) do
         @infov 1 "info 1 message"
     end
-    @test logger.logs[1].group == 1
+    @test isempty(logger.logs)
 
     logger = TestLogger(min_level=Info)
     with_logger(logger) do
@@ -258,8 +258,7 @@ end
         end
     end
     @test length(logger.logs) == 2
-    @test all(x -> x.level == Debug, logger.logs)
-    @test map(x -> x.group, logger.logs) == [0, 1]
+    @test map(x -> x.level, logger.logs) == [Debug, Debug-1]
 end
 
 @testset "Deprecations" begin
