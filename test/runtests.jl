@@ -259,6 +259,16 @@ end
     end
     @test length(logger.logs) == 2
     @test map(x -> x.level, logger.logs) == [Debug, Debug-1]
+
+    logger = TestLogger(min_level=Info)
+    with_logger(logger) do
+        with_logger(MinLevelLogger(current_logger(), Info)) do
+            LoggingExtras.withlevel(Debug; verbosity=1) do
+                @debug "This should show up, even though it is behind 2 info level filters"
+            end
+        end
+    end
+    @test_broken length(logger.logs) == 1
 end
 
 @testset "Deprecations" begin
