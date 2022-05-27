@@ -15,8 +15,9 @@ handle_message(logger::LevelOverrideLogger, args...; kwargs...) =
     handle_message(logger.logger, args...; kwargs...)
 
 function shouldlog(logger::LevelOverrideLogger, level, args...)
-    # Ignore the logger.logger's own level and instead check the override level
-    level >= logger.level && shouldlog(logger.logger, level, args...)
+    # unlike other CompositionalLoggers: No level check as we are ignoring the 
+    # logger.loggers level and just using the overriden leven which has already been checked
+    return shouldlog(logger.logger, level, args...)
 end
 
 min_enabled_level(logger::LevelOverrideLogger) = logger.level
