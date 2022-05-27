@@ -93,6 +93,7 @@ All of them, except `FormatLogger`, just wrap existing loggers.
  - The `FileLogger` is a simple logger sink that writes to file.
  - The `DatetimeRotatingFileLogger` is a logger sink that writes to file, rotating logs based upon a user-provided `DateFormat`.
  - The `FormatLogger` is a logger sink that simply formats the message and writes to the logger stream.
+ - The `LevelOverrideLogger` for overriding the log level of other loggers
 
 By combining `TeeLogger` with filter loggers you can arbitrarily route log messages, wherever you want.
 
@@ -373,6 +374,61 @@ julia> with_logger(logger) do
 Main | [Info] This is an informational message.
 Main | [Warn] This is a warning, should take a look.
 ```
+
+## `LevelOverrideLogger` (*Filter*)
+Allows overriding the minimum log level set by the logger it wraps.
+Useful when debug logging
+and used in conjuction with `Logging.with_logger` or `LoggingExtras.withlevel` to
+temporarily modify the current logger with a custom level.
+More generally useful if you want to use the current/global logger as a _sink_ but don't know if it is going to have a problematically high min log level set (as julia's default logger sets min level to `Info`).
+
+```julia
+julia> using LoggingExtras
+
+julia> logger = LevelOverrideLogger(Debug, global_logger())
+
+julia> with_logger(logger) do
+           @debug "This message will log since we're overriding the global Info default log level"
+       end
+┌ Debug: This message will log since we're overriding the global Info default log level
+└ @ Main REPL[33]:2
+```
+This is roughly complementary to the `MinLevelFilterLogger`.
+The `MinLevelFilterLogger` lets you effectively *raise* the level of any logger it wraps to meet the level you specify.
+The `LevelOverrideLogger` lets you *lower* (or *raise*) the level of the wrapped logger as it bypasses checks on it entirely.
+
+# Utilities
+
+## Verbosity macros
+Sometimes when logging, it is desirable to be able to specify a verbosity level along with
+the log level, and to be able to filter on verbosity levels. For example, you may want multiple levels
+of verbosity for `Debug` log statements. LoggingExtras.jl exports verbosity macros that act like their
+non-verbose counterparts, but allow specifying a verbosity level as well:
+  * `@debugv N msg`
+  * `@infov N msg`
+  * `@warnv N msg`
+  * `@errorv N msg`
+
+For verbosity filtering, the `LoggingExtras.withlevel(f, Info; verbosity=0)` utlility is provided
+for temporarily (i.e. while `f()` is executed) allowing log messages with `level` and `verbosity`.
+This is very handy for allowing finer grained control in debug logging for long-running or complex user API function
+calls. For example:
+
+```julia
+using LoggingExtras
+
+function complex_user_call(; verbose=0)
+    LoggingExtras.withlevel(Debug; verbosity=verbose)
+        # execute complex function body
+        @debugv 1 "a level 1 verbosity debug message"
+        @debugv 2 "a more verbose level 2 debug message"
+    end
+end
+```
+
+This allows easy control by the user to specify verbosity (by passing `verbose=2` or any > 0 value),
+and convenience for the function developer by being able to sprinkle `@debugv N msg` calls as desired,
+even in highly nested functions.
 
 # More Examples
 

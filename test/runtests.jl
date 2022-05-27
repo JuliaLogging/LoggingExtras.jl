@@ -239,6 +239,54 @@ end
     end
 end
 
+@testset "LevelOverrideLogger" begin
+    logger = TestLogger(min_level=Info)
+    with_logger(LevelOverrideLogger(Debug, logger)) do
+        @debug "debug message"
+        @info "info message"
+
+    end
+    @test length(logger.logs) == 2
+    @test map(x -> x.level, logger.logs) == [Debug, Info]
+end
+
+@testset "Verbosity utilities" begin
+    logger = TestLogger(min_level=Info)
+    with_logger(logger) do
+        @infov 1 "info 1 message"
+    end
+    @test isempty(logger.logs)
+
+    logger = TestLogger(min_level=Info)
+    with_logger(logger) do
+        LoggingExtras.withlevel(Debug) do
+            @debug "debug message"
+        end
+    end
+    @test logger.logs[1].level == Debug
+
+    logger = TestLogger(min_level=Info)
+    with_logger(logger) do
+        LoggingExtras.withlevel(Debug; verbosity=1) do
+            @debugv 0 "debug 0 message"
+            @debugv 1 "debug 1 message"
+            @debugv 2 "debug 2 message"
+        end
+    end
+    @test length(logger.logs) == 2
+    @test map(x -> x.level, logger.logs) == [Debug, Debug-1]
+
+    logger = TestLogger(min_level=Info)
+    with_logger(logger) do
+        with_logger(MinLevelLogger(current_logger(), Info)) do
+            LoggingExtras.withlevel(Debug; verbosity=1) do
+                @debug "This should show up, even though it is behind 2 info level filters"
+            end
+        end
+    end
+    @test_broken length(logger.logs) == 1
+end
+
 @testset "Deprecations" begin
     testlogger = TestLogger(min_level=BelowMinLevel)
 
