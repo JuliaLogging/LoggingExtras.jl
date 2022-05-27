@@ -243,7 +243,7 @@ end
 
     logger = TestLogger(min_level=Info)
     with_logger(logger) do
-        LoggingExtras.with(level=Debug) do
+        LoggingExtras.withlevel(Debug) do
             @debug "debug message"
         end
     end
@@ -251,7 +251,7 @@ end
 
     logger = TestLogger(min_level=Info)
     with_logger(logger) do
-        LoggingExtras.with(level=Debug, verbosity=1) do
+        LoggingExtras.withlevel(Debug; verbosity=1) do
             @debugv 0 "debug 0 message"
             @debugv 1 "debug 1 message"
             @debugv 2 "debug 2 message"

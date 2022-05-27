@@ -1,4 +1,7 @@
 function restore_callsite_source_position!(expr, src)
+    @assert expr.head == :escape
+    @assert expr.args[1].head == :macrocall
+    @assert expr.args[1].args[2] isa LineNumberNode
     # used to fix the logging source file + line
     # since we're lowering our verbose logging macros to the
     # Logging.jl macros; otherwise, they would always report this (verbosity.jl)
@@ -24,6 +27,7 @@ For convenience, the
 wrap the current logger with a log level and verbosity subtracted to filter while `f` is executed.
 """
 
+"$vlogmacrodocs"
 macro debugv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@logmsg (Logging.Debug - $verbosity) $msg $(exs...))),
@@ -31,6 +35,7 @@ macro debugv(verbosity::Int, msg, exs...)
     )
 end
 
+"$vlogmacrodocs"
 macro infov(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@logmsg (Logging.Info - $verbosity) $msg $(exs...))),
@@ -38,6 +43,7 @@ macro infov(verbosity::Int, msg, exs...)
     )
 end
 
+"$vlogmacrodocs"
 macro warnv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@logmsg (Logging.Warn - $verbosity) $msg $(exs...))),
@@ -45,6 +51,7 @@ macro warnv(verbosity::Int, msg, exs...)
     )
 end
 
+"$vlogmacrodocs"
 macro errorv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@logmsg (Logging.Error - $verbosity) $msg $(exs...))),
@@ -52,6 +59,7 @@ macro errorv(verbosity::Int, msg, exs...)
     )
 end
 
+"$vlogmacrodocs"
 macro logmsgv(verbosity::Int, level, msg, exs...)
     return restore_callsite_source_position!(
         esc(:($Base.@logmsg ($level - $verbosity) $msg $(exs...))),
@@ -59,14 +67,8 @@ macro logmsgv(verbosity::Int, level, msg, exs...)
     )
 end
 
-@eval @doc $vlogmacrodocs :(@logmsgv)
-@eval @doc $vlogmacrodocs :(@debugv)
-@eval @doc $vlogmacrodocs :(@infov)
-@eval @doc $vlogmacrodocs :(@warnv)
-@eval @doc $vlogmacrodocs :(@errorv)
-
 """
-    LoggingExtras.with(f; level=Info)
+    LoggingExtras.withlevel(f, level; verbosity::Integer=0)
 
 Convenience function like `Logging.with_logger` to temporarily wrap
 the current logger with a level filter while `f` is executed.
@@ -74,7 +76,7 @@ That is, the current logger will still be used for actual logging, but
 log messages will first be checked that they meet the `level`
 log level before being passed on to be logged.
 """
-function with(f; level::Union{Int, LogLevel}=Info, verbosity::Integer=0)
+function withlevel(f, level::Union{Int, LogLevel}=Info; verbosity::Integer=0)
     lvl = Base.CoreLogging._min_enabled_level[]
     try
         # by default, this global filter is Debug, but for debug logging

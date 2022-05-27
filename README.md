@@ -368,7 +368,7 @@ Main | [Warn] This is a warning, should take a look.
 ## `LevelOverrideLogger` (*Filter*)
 Allows overriding the minimum log level set by the logger it wraps.
 Useful when debug logging
-and used in conjuction with `Logging.with_logger` or `LoggingExtras.with` to
+and used in conjuction with `Logging.with_logger` or `LoggingExtras.withlevel` to
 temporarily modify the current logger with a custom level.
 More generally useful if you want to use the current/global logger as a _sink_ but don't know if it is going to have a problematically high min log level set (as julia's default logger sets min level to `Info`).
 
@@ -399,7 +399,7 @@ non-verbose counterparts, but allow specifying a verbosity level as well:
   * `@warnv N msg`
   * `@errorv N msg`
 
-For verbosity filtering, the `LoggingExtras.with(f; level=Info, verbosity=0)` utlility is provided
+For verbosity filtering, the `LoggingExtras.withlevel(f, Info; verbosity=0)` utlility is provided
 for temporarily (i.e. while `f()` is executed) allowing log messages with `level` and `verbosity`.
 This is very handy for allowing finer grained control in debug logging for long-running or complex user API function
 calls. For example:
@@ -408,7 +408,7 @@ calls. For example:
 using LoggingExtras
 
 function complex_user_call(; verbose=0)
-    LoggingExtras.with(; level=Debug, verbosity=verbose)
+    LoggingExtras.withlevel(Debug; verbosity=verbose)
         # execute complex function body
         @debugv 1 "a level 1 verbosity debug message"
         @debugv 2 "a more verbose level 2 debug message"
