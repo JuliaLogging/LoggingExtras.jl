@@ -84,11 +84,21 @@ log level before being passed on to be logged.
 For convenience, a `verbosity` keyword argument can be passed which also
 filters the "verbose logging" messages; see [`@debugv`](@ref), [`@infov`](@ref),
 [`@warnv`](@ref), [`@errorv`](@ref), and [`@logmsgv`](@ref).
+
+!!! note
+
+    If you are not using any of the LoggingExtras compositional loggers then the level 
+    override just applies to the current logger. If on the other hand you are using 
+    compositional loggers then the override is applied throughout the current logging tree.
+    This is generally what you want, but do be aware that in the case of the 
+    [`TeeLogger`](@ref) all branches of the T are overriden.
+    For more control directly construct the logger you want by making use of
+    [`LevelOverrideLogger`](@ref) and then use `with_logger` to make it active.
 """
 function withlevel(f, level::Union{Int, LogLevel}=Info; verbosity::Integer=0)
     with_logger(EarlyFilteredLogger(
         args -> !(args.group isa Verbosity) || verbosity >= args.group.verbosity,
-        LevelOverrideLogger(level, current_logger()))
+        propagate_level_override(level, current_logger()))
     ) do
         f()
     end
