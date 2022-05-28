@@ -1,6 +1,7 @@
 The LoggingExtras.jl package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2018: Lyndon White <oxinabox@ucc.asn.au>
+> Copyright (c) 2022: Frames White <oxinabox@ucc.asn.au> and Collaborators
+> https://github.com/JuliaLogging/LoggingExtras.jl/graphs/contributors
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
