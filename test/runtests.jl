@@ -255,7 +255,8 @@ end
     with_logger(logger) do
         @infov 1 "info 1 message"
     end
-    @test isempty(logger.logs)
+    # if no verbosity filter is used, message is just like @info
+    @test !isempty(logger.logs)
 
     logger = TestLogger(min_level=Info)
     with_logger(logger) do
@@ -271,10 +272,14 @@ end
             @debugv 0 "debug 0 message"
             @debugv 1 "debug 1 message"
             @debugv 2 "debug 2 message"
+            # error message *also* isn't logged since
+            # level *and* verbosity must match
+            @errorv 2 "error 2 message"
         end
     end
     @test length(logger.logs) == 2
-    @test map(x -> x.level, logger.logs) == [Debug, Debug-1]
+    @test logger.logs[1].group == LoggingExtras.Verbosity(0)
+    @test logger.logs[2].group == LoggingExtras.Verbosity(1)
 
     logger = TestLogger(min_level=Info)
     with_logger(logger) do
