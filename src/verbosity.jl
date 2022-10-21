@@ -18,19 +18,24 @@ vlogmacrodocs = """
 
 "Verbose" logging macros. Drop in replacements of standard logging macros, but an
 additional verbosity level `N` is passed to indicate differing verbosity levels
-for a given log level. The verbosity argument is subtracted from the base log level when passed down
-to the core logging logic, so `@debugv 1 msg` will essentially call `@logmsg Debug-1 msg`.
+for a given log level. The verbosity argument is passed as the `group` argument
+to the core logging logic as a `LoggingExtras.Verbosity` object.
 
-An `LoggingExtras.LevelOverrideLogger`can then be used to filter on the `level` argument.
+Note these "verbose" logging messages will only be filtered if a filter logger is used.
+A `LoggingExtras.EarlyFilteredLogger`can be used to filter on the `group.verbosity` argument.
 For convenience, the
-[`LoggintExtras.with(f; level, verbosity)`](@ref) function is provided to temporarily
-wrap the current logger with a log level and verbosity subtracted to filter while `f` is executed.
+[`LoggintExtras.withlevel(f, level; verbosity)`](@ref) function is provided to temporarily
+wrap the current logger with a log level and verbosity to filter while `f` is executed.
 """
+
+struct Verbosity
+    verbosity::Int
+end
 
 "$vlogmacrodocs"
 macro debugv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@logmsg (Logging.Debug - $verbosity) $msg $(exs...))),
+        esc(:($Base.@debug $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
         __source__,
     )
 end
@@ -38,7 +43,7 @@ end
 "$vlogmacrodocs"
 macro infov(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@logmsg (Logging.Info - $verbosity) $msg $(exs...))),
+        esc(:($Base.@info $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
         __source__,
     )
 end
@@ -46,7 +51,7 @@ end
 "$vlogmacrodocs"
 macro warnv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@logmsg (Logging.Warn - $verbosity) $msg $(exs...))),
+        esc(:($Base.@warn $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
         __source__,
     )
 end
@@ -54,7 +59,7 @@ end
 "$vlogmacrodocs"
 macro errorv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@logmsg (Logging.Error - $verbosity) $msg $(exs...))),
+        esc(:($Base.@error $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
         __source__,
     )
 end
@@ -62,7 +67,7 @@ end
 "$vlogmacrodocs"
 macro logmsgv(verbosity::Int, level, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@logmsg ($level - $verbosity) $msg $(exs...))),
+        esc(:($Base.@logmsg $level $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
         __source__,
     )
 end
@@ -75,17 +80,16 @@ the current logger with a level filter while `f` is executed.
 That is, the current logger will still be used for actual logging, but
 log messages will first be checked that they meet the `level`
 log level before being passed on to be logged.
+
+For convenience, a `verbosity` keyword argument can be passed which also
+filters the "verbose logging" messages; see [`@debugv`](@ref), [`@infov`](@ref),
+[`@warnv`](@ref), [`@errorv`](@ref), and [`@logmsgv`](@ref).
 """
 function withlevel(f, level::Union{Int, LogLevel}=Info; verbosity::Integer=0)
-    lvl = Base.CoreLogging._min_enabled_level[]
-    try
-        # by default, this global filter is Debug, but for debug logging
-        # we want to enable sub-Debug levels
-        Base.CoreLogging._min_enabled_level[] = BelowMinLevel
-        with_logger(LevelOverrideLogger(level - verbosity, current_logger())) do
-            f()
-        end
-    finally
-        Base.CoreLogging._min_enabled_level[] = lvl
+    with_logger(EarlyFilteredLogger(
+        args -> !(args.group isa Verbosity) || verbosity >= args.group.verbosity,
+        LevelOverrideLogger(level, current_logger()))
+    ) do
+        f()
     end
 end
