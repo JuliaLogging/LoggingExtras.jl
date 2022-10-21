@@ -35,7 +35,7 @@ end
 "$vlogmacrodocs"
 macro debugv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@debug $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
+        :($Base.@debug $msg _group=$(Verbosity(verbosity)) $(esc.(exs)...))),
         __source__,
     )
 end
