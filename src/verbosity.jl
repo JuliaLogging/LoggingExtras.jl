@@ -35,7 +35,7 @@ end
 "$vlogmacrodocs"
 macro debugv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        :($Base.@debug $msg _group=$(Verbosity(verbosity)) $(esc.(exs)...))),
+        esc(:($Base.@debug $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
 end
@@ -43,7 +43,7 @@ end
 "$vlogmacrodocs"
 macro infov(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@info $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
+        esc(:($Base.@info $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
 end
@@ -51,7 +51,7 @@ end
 "$vlogmacrodocs"
 macro warnv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@warn $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
+        esc(:($Base.@warn $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
 end
@@ -59,7 +59,7 @@ end
 "$vlogmacrodocs"
 macro errorv(verbosity::Int, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@error $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
+        esc(:($Base.@error $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
 end
@@ -67,7 +67,7 @@ end
 "$vlogmacrodocs"
 macro logmsgv(verbosity::Int, level, msg, exs...)
     return restore_callsite_source_position!(
-        esc(:($Base.@logmsg $level $msg _group=LoggingExtras.Verbosity($verbosity) $(exs...))),
+        esc(:($Base.@logmsg $level $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
 end
