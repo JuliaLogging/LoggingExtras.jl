@@ -272,6 +272,9 @@ end
             @debugv 0 "debug 0 message"
             @debugv 1 "debug 1 message"
             @debugv 2 "debug 2 message"
+            # error message *also* isn't logged since
+            # level *and* verbosity must match
+            @errorv 2 "error 2 message"
         end
     end
     @test length(logger.logs) == 2
