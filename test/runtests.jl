@@ -289,7 +289,7 @@ end
             end
         end
     end
-    @test_broken length(logger.logs) == 1
+    @test length(logger.logs) == 1
 end
 
 @testset "Deprecations" begin
