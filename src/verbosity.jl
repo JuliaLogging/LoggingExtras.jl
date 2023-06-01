@@ -24,7 +24,7 @@ to the core logging logic as a `LoggingExtras.Verbosity` object.
 Note these "verbose" logging messages will only be filtered if a filter logger is used.
 A `LoggingExtras.EarlyFilteredLogger`can be used to filter on the `group.verbosity` argument.
 For convenience, the
-[`LoggintExtras.withlevel(f, level; verbosity)`](@ref) function is provided to temporarily
+[`LoggingExtras.withlevel(f, level; verbosity)`](@ref) function is provided to temporarily
 wrap the current logger with a log level and verbosity to filter while `f` is executed.
 """
 

@@ -418,7 +418,7 @@ calls. For example:
 using LoggingExtras
 
 function complex_user_call(; verbose=0)
-    LoggingExtras.withlevel(Debug; verbosity=verbose)
+    LoggingExtras.withlevel(Debug; verbosity=verbose) do
         # execute complex function body
         @debugv 1 "a level 1 verbosity debug message"
         @debugv 2 "a more verbose level 2 debug message"
