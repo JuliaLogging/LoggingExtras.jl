@@ -1,10 +1,37 @@
 # LoggingExtras
-
 [![Build Status](https://travis-ci.org/oxinabox/LoggingExtras.jl.svg?branch=master)](https://travis-ci.org/oxinabox/LoggingExtras.jl)
 
 [![codecov.io](http://codecov.io/github/oxinabox/LoggingExtras.jl/coverage.svg?branch=master)](http://codecov.io/github/oxinabox/LoggingExtras.jl?branch=master)
+```mermaid
+flowchart LR
 
-![Diagram showing how loggers connect](diag.svg)
+    info("@"info)-->TeeLogger1(Tee<br>Logger)
+    warn("@"warn)-->TeeLogger1(Tee<br>Logger)
+    error("@"error)-->TeeLogger1(Tee<br>Logger)
+    debug("@"debug)-->TeeLogger1(Tee<br>Logger)
+    TeeLogger1:::teeloger -----> ConsoleLogger(Console<br>Logger)
+    TeeLogger1:::teeloger --> FilteredLogger(Filtered<br>Logger)
+    FilteredLogger:::filteredlogger --> TeeLogger2(Tee<br>Logger)
+    TeeLogger2:::teeloger --> FilteredLogger3(Filtered<br>Logger)
+    TeeLogger2:::teeloger --> FilteredLogger4(Filtered<br>Logger)
+    TeeLogger2:::teeloger --> FilteredLogger5(Filtered<br>Logger)
+    FilteredLogger3:::filteredlogger --> FileLogger1(File<br>Logger)
+    FilteredLogger4:::filteredlogger --> FileLogger2(File<br>Logger)
+    FilteredLogger5:::filteredlogger --> FileLogger3(File<br>Logger)
+
+
+    style info stroke:#0000ff,stroke-width:2px
+    style warn stroke:#f66,stroke-width:2px
+    style error stroke:#ff0000,stroke-width:2px    
+    style debug stroke:#3cb371,stroke-width:2px
+    style ConsoleLogger stroke:#ffa500,stroke-width:2px
+    classDef teeloger stroke:#6a5acd,stroke-width:2px
+    classDef filteredlogger stroke:#0000ff,stroke-width:2px
+    classDef filelogger stroke:#3cb371,stroke-width:2px
+    style FileLogger1 stroke:#3cb371,stroke-width:2px
+    style FileLogger2 stroke:#f66,stroke-width:2px
+    style FileLogger3 stroke:#D8BFD8,stroke-width:2px
+```
 
 # Discussion: Compositional Loggers
 
