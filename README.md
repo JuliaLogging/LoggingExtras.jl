@@ -14,7 +14,7 @@ Loggers break down into four types:
  - *Sinks*: Sinks are the endpoint of a log message journey. They write it to file or display it on the console or set off a red flashing light in the laboratory. A Sink should never decide what to accept, only what to do with it.
  - *Filters*: Filters wrap around other loggers and decide whether or not to pass on a message. When that decision occurs, they can be further broken down (See `ActiveFilteredLogger` vs `EarlyFilteredLogger`).
  - *Transformers*: Transformers modify the content of log messages before passing them on, including metadata, such as severity level. Unlike Filters, they can't block a log message, but they could drop its level down to say Debug so that usually no one would see it.
- - *Demux*: There is only one possible Demux Logger, and it is central to log routing. It acts as a hub that receives one log message and then sends copies to all its child loggers. Like in the diagram above, it can be composed with Filters to control what goes where.
+ - *Tee*: There is only one possible TeeLogger, and it is central to log routing. It acts as a hub that receives one log message and then sends copies to all its child loggers. Like in the diagram above, it can be composed with Filters to control what goes where.
 
 This is a complete taxonomy of all compositional loggers, with this package implementing the entire set. As such, there should be no need to build routing components when configuring the ones included in this package.    
 
