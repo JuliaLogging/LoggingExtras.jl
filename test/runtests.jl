@@ -189,6 +189,11 @@ end
         l1 = DatetimeRotatingFileLogger(dir, dateformat"yyyy-mm-dd.\l\o\g")
         l2 = DatetimeRotatingFileLogger(identity, dir, dateformat"yyyy-mm-dd.\l\o\g")
         @test l.filename_pattern == l1.filename_pattern == l2.filename_pattern
+
+        # Test large resolutions, which have some weirdness related to ordering
+        # (see next_datetime_transition()). These should not throw.
+        DatetimeRotatingFileLogger(dir, raw"yyyy-mm.\l\o\g")
+        DatetimeRotatingFileLogger(dir, raw"yyyy.\l\o\g")
     end
 end
 

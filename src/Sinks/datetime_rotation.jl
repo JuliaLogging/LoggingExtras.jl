@@ -126,7 +126,7 @@ function next_datetime_transition(fmt::DateFormat)
 
     tokens = filter(t -> isa(t, Dates.DatePart), collect(fmt.tokens))
     minimum_timescale = first(sort(map(t -> token_timescales[extract_token(t)], tokens), lt=custom_isless))
-    if minimum_timescale < Minute(1)
+    if custom_isless(minimum_timescale, Minute(1))
         throw(ArgumentError("rotating the logger with sub-minute resolution not supported"))
     end
     return ceil(now(), minimum_timescale)
