@@ -1,7 +1,7 @@
 name = "LoggingExtras"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 authors = ["Frames White <oxinabox@ucc.asn.au>", "Collaborators <https://github.com/JuliaLogging/LoggingExtras.jl/graphs/contributors>"]
-version = "1.0.1"
+version = "1.0.2"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"

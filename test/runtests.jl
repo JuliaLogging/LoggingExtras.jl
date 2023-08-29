@@ -297,6 +297,51 @@ end
     @test length(logger.logs) == 1
 end
 
+# Define a module for testing conditional debug messages
+module JuliaDebugTest
+
+function debug_message(str)
+    @debug str
+end
+
+end
+
+@testset "JULIA_DEBUG" begin
+    expected_messages = 0
+    logger = TestLogger(min_level=Info)
+    with_logger(logger) do
+        JuliaDebugTest.debug_message("debug")
+    end
+    @test length(logger.logs) == expected_messages
+
+    extra_logger = TransformerLogger(logger) do log
+        merge(log, (; message="New message"))
+    end
+    with_logger(extra_logger) do
+        JuliaDebugTest.debug_message("debug")
+    end
+    @test length(logger.logs) == expected_messages
+
+    ENV["JULIA_DEBUG"] = "JuliaDebugTest"
+    with_logger(logger) do
+        JuliaDebugTest.debug_message("debug")
+        expected_messages += 1
+    end
+    @test length(logger.logs) == expected_messages
+
+    with_logger(extra_logger) do
+        JuliaDebugTest.debug_message("debug")
+        expected_messages += 1
+    end
+    @test length(logger.logs) == expected_messages
+
+    delete!(ENV, "JULIA_DEBUG")
+    with_logger(extra_logger) do
+        JuliaDebugTest.debug_message("debug")
+    end
+    @test length(logger.logs) == expected_messages
+end
+
 @testset "Deprecations" begin
     # Nothing is currently deprecated
 end
