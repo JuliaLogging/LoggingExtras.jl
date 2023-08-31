@@ -4,9 +4,10 @@
 # before passing anything on.
 
 # For checking child logger, need to check both `min_enabled_level` and `shouldlog`
-function comp_shouldlog(logger, args...)
-    level = first(args)
-    min_enabled_level(logger) <= level && shouldlog(logger, args...)
+function comp_shouldlog(logger, level, _module, group, id)
+    (min_enabled_level(logger) <= level && shouldlog(logger, level, _module, group, id)) ||
+        Base.CoreLogging.env_override_minlevel(group, _module)
+        # `env_override_minlevel` is the internal function that makes JULIA_DEBUG environment variable work
 end
 
 # For checking if child logger will take the message you are sending
