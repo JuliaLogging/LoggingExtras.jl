@@ -300,9 +300,9 @@ end
 # Define a module for testing conditional debug messages
 module JuliaDebugTest
 
-function debug_message(str)
-    @debug str
-end
+    function debug_message(str)
+        @debug str
+    end
 
 end
 
