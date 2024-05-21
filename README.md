@@ -32,6 +32,9 @@ ConsoleLogger(stream, min_level) =
     )
 ```
 
+# Video
+[![Video from Juliacon 2023](http://img.youtube.com/vi/G9eZh0CxKgo/0.jpg)](http://www.youtube.com/watch?v=G9eZh0CxKgo "Logging in Julia: Logging stdlib and LoggingExtras.jl |")
+
 
 # Usage
 Load the package `using LoggingExtras`.
@@ -486,3 +489,4 @@ This will produce output similar to:
 ┌ Error: 2019-09-20 17:43:54 ErrorException("SearchLight validation error(s) for Translations.Translation")
 └ @ TranslationsController ~/Dropbox/Projects/LiteCMS/app/resources/translations/TranslationsController.jl:69
 ```
+
