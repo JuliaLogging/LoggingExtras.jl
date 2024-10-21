@@ -11,7 +11,7 @@ import Base.CoreLogging:
 export TeeLogger, TransformerLogger, FileLogger,
     ActiveFilteredLogger, EarlyFilteredLogger, MinLevelLogger,
     DatetimeRotatingFileLogger, FormatLogger, LevelOverrideLogger,
-    @debugv, @infov, @warnv, @errorv, @logmsgv
+    @debugv, @infov, @warnv, @errorv, @logmsgv, withlevel
 
 ######
 # Re export Logging.jl from stdlib 

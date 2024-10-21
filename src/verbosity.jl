@@ -1,4 +1,4 @@
-function restore_callsite_source_position!(expr, src)
+function restore_callsite_source_position!(m, expr, src)
     @assert expr.head == :escape
     @assert expr.args[1].head == :macrocall
     @assert expr.args[1].args[2] isa LineNumberNode
@@ -7,7 +7,15 @@ function restore_callsite_source_position!(expr, src)
     # Logging.jl macros; otherwise, they would always report this (verbosity.jl)
     # file as the logging callsite
     expr.args[1].args[2] = src
-    return expr
+    ex = quote
+        LoggingExtras.deprecate_verbosity($(Meta.quot(m)))
+        $expr
+    end
+    return ex
+end
+
+function deprecate_verbosity(m)
+    Base.depwarn("Verbosity logging macros are deprecated as they are not compatible with juliac-compiled programs", m; force=true)
 end
 
 vlogmacrodocs = """
@@ -34,7 +42,7 @@ end
 
 "$vlogmacrodocs"
 macro debugv(verbosity::Int, msg, exs...)
-    return restore_callsite_source_position!(
+    return restore_callsite_source_position!(:debugv,
         esc(:($Base.@debug $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
@@ -42,7 +50,7 @@ end
 
 "$vlogmacrodocs"
 macro infov(verbosity::Int, msg, exs...)
-    return restore_callsite_source_position!(
+    return restore_callsite_source_position!(:infov,
         esc(:($Base.@info $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
@@ -50,7 +58,7 @@ end
 
 "$vlogmacrodocs"
 macro warnv(verbosity::Int, msg, exs...)
-    return restore_callsite_source_position!(
+    return restore_callsite_source_position!(:warnv,
         esc(:($Base.@warn $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
@@ -58,7 +66,7 @@ end
 
 "$vlogmacrodocs"
 macro errorv(verbosity::Int, msg, exs...)
-    return restore_callsite_source_position!(
+    return restore_callsite_source_position!(:errorv,
         esc(:($Base.@error $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
@@ -66,14 +74,14 @@ end
 
 "$vlogmacrodocs"
 macro logmsgv(verbosity::Int, level, msg, exs...)
-    return restore_callsite_source_position!(
+    return restore_callsite_source_position!(:logmsgv,
         esc(:($Base.@logmsg $level $msg _group=$(Verbosity(verbosity)) $(exs...))),
         __source__,
     )
 end
 
 """
-    LoggingExtras.withlevel(f, level; verbosity::Integer=0)
+    LoggingExtras.withlevel(f, level; verbosity::Integer=0, group::Union{Symbol, Nothing}=nothing)
 
 Convenience function like `Logging.with_logger` to temporarily wrap
 the current logger with a level filter while `f` is executed.
@@ -81,9 +89,10 @@ That is, the current logger will still be used for actual logging, but
 log messages will first be checked that they meet the `level`
 log level before being passed on to be logged.
 
-For convenience, a `verbosity` keyword argument can be passed which also
-filters the "verbose logging" messages; see [`@debugv`](@ref), [`@infov`](@ref),
-[`@warnv`](@ref), [`@errorv`](@ref), and [`@logmsgv`](@ref).
+For convenience, a `group` keyword argument can be passed which also
+filters logging messages on the "group". By default, the group is the
+file name of the log macro call site, but can be overridden by passing
+the `_group` keyword argument to the logging macros.
 
 !!! note
 
@@ -95,11 +104,24 @@ filters the "verbose logging" messages; see [`@debugv`](@ref), [`@infov`](@ref),
     For more control directly construct the logger you want by making use of
     [`LevelOverrideLogger`](@ref) and then use `with_logger` to make it active.
 """
-function withlevel(f, level::Union{Int, LogLevel}=Info; verbosity::Integer=0)
-    with_logger(EarlyFilteredLogger(
-        args -> !(args.group isa Verbosity) || verbosity >= args.group.verbosity,
-        propagate_level_override(level, current_logger()))
-    ) do
-        f()
+function withlevel(f, level::Union{Int, LogLevel}=Info; verbosity::Integer=0, group::Union{Symbol, Nothing}=nothing)
+    if verbosity > 0
+        deprecate_verbosity(:withlevel)
+    end
+    verbosity > 0 && group !== nothing && throw(ArgumentError("Cannot specify both verbosity and group"))
+    if group === nothing
+        with_logger(EarlyFilteredLogger(
+            args -> !(args.group isa Verbosity) || verbosity >= args.group.verbosity,
+            propagate_level_override(level, current_logger()))
+        ) do
+            f()
+        end
+    else
+        with_logger(EarlyFilteredLogger(
+            args -> args.group === group,
+            propagate_level_override(level, current_logger())
+        )) do
+            f()
+        end
     end
 end
