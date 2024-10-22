@@ -15,7 +15,7 @@ function restore_callsite_source_position!(m, expr, src)
 end
 
 function deprecate_verbosity(m)
-    Base.depwarn("Verbosity logging macros are deprecated as they are not compatible with juliac-compiled programs", m; force=true)
+    Base.depwarn("Verbosity logging macros are deprecated as they are not compatible with juliac-compiled programs", m)
 end
 
 vlogmacrodocs = """
