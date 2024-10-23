@@ -255,14 +255,7 @@ end
     @test map(x -> x.level, logger.logs) == [Debug, Info]
 end
 
-@testset "Verbosity utilities" begin
-    logger = TestLogger(min_level=Info)
-    with_logger(logger) do
-        @infov 1 "info 1 message"
-    end
-    # if no verbosity filter is used, message is just like @info
-    @test !isempty(logger.logs)
-
+@testset "withlevel convenience" begin
     logger = TestLogger(min_level=Info)
     with_logger(logger) do
         LoggingExtras.withlevel(Debug) do
@@ -273,27 +266,13 @@ end
 
     logger = TestLogger(min_level=Info)
     with_logger(logger) do
-        LoggingExtras.withlevel(Debug; verbosity=1) do
-            @debugv 0 "debug 0 message"
-            @debugv 1 "debug 1 message"
-            @debugv 2 "debug 2 message"
-            # error message *also* isn't logged since
-            # level *and* verbosity must match
-            @errorv 2 "error 2 message"
+        LoggingExtras.withlevel(Debug; group=:foo) do
+            @debug "debug message" _group=:foo
+            @debug "debug message" _group=:bar
         end
     end
-    @test length(logger.logs) == 2
-    @test logger.logs[1].group == LoggingExtras.Verbosity(0)
-    @test logger.logs[2].group == LoggingExtras.Verbosity(1)
-
-    logger = TestLogger(min_level=Info)
-    with_logger(logger) do
-        with_logger(MinLevelLogger(current_logger(), Info)) do
-            LoggingExtras.withlevel(Debug; verbosity=1) do
-                @debug "This should show up, even though it is behind 2 info level filters"
-            end
-        end
-    end
+    @test logger.logs[1].level == Debug
+    # test that we filtered on only foo group log messages
     @test length(logger.logs) == 1
 end
 
