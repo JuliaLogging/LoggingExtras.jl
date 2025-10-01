@@ -197,6 +197,17 @@ end
     end
 end
 
+Base.@kwdef struct BasicLogFormatter
+    include_module::Bool=true
+end
+
+function (formatter::BasicLogFormatter)(io::IO, args::NamedTuple)
+    if formatter.include_module
+        print(io, args._module, " | ")
+    end
+    println(io, "[", args.level, "] ", args.message)
+end
+
 @testset "FormatLogger" begin
     io = IOBuffer()
     logger = FormatLogger(io) do io, args
@@ -242,6 +253,21 @@ end
         l = read(f, String)
         @test startswith(l, "log message")
     end
+
+    # test function-like objects/functor are supported
+    io = IOBuffer()
+    with_logger(FormatLogger(BasicLogFormatter(; include_module=true), io)) do
+        @info "test message"
+    end
+    str = String(take!(io))
+    @test str == "$(@__MODULE__()) | [Info] test message\n"
+
+    io = IOBuffer()
+    with_logger(FormatLogger(BasicLogFormatter(; include_module=false), io)) do
+        @warn "test message"
+    end
+    str = String(take!(io))
+    @test str == "[Warn] test message\n"
 end
 
 @testset "LevelOverrideLogger" begin
