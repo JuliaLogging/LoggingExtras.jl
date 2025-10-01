@@ -9,8 +9,8 @@ end
     FormatLogger(formatter, io::IO=stderr; always_flush=true)
 
 Logger sink that formats the message and finally writes to `io`.
-The formatting function should be of the form `formatter(io::IOContext, log_args::NamedTuple)`
-where `log_args` has the following fields:
+The formatting function should be of the form `formatter(io::IOContext, log::NamedTuple)`
+where `log` has the following fields:
 `(level, message, _module, group, id, file, line, kwargs)`.
 See [`LoggingExtras.handle_message_args`](@ref) for more information on what field is.
 
@@ -18,8 +18,8 @@ See [`LoggingExtras.handle_message_args`](@ref) for more information on what fie
 ```julia-repl
 julia> using Logging, LoggingExtras
 
-julia> logger = FormatLogger() do io, args
-           println(io, args._module, " | ", "[", args.level, "] ", args.message)
+julia> logger = FormatLogger() do io, log
+           println(io, log._module, " | ", "[", log.level, "] ", log.message)
        end;
 
 julia> with_logger(logger) do
@@ -49,12 +49,12 @@ function FormatLogger(formatter, path::AbstractString; append::Bool=false, kw...
 end
 
 function handle_message(logger::FormatLogger, args...; kwargs...)
-    log_args = handle_message_args(args...; kwargs...)
+    log = handle_message_args(args...; kwargs...)
     # We help the user by passing an IOBuffer to the formatting function
     # to make sure that everything writes to the logger io in one go.
     iob = IOBuffer()
     ioc = IOContext(iob, logger.stream)
-    logger.formatter(ioc, log_args)
+    logger.formatter(ioc, log)
     write(logger.stream, take!(iob))
     logger.always_flush && flush(logger.stream)
     return nothing

@@ -201,23 +201,23 @@ Base.@kwdef struct BasicLogFormatter
     include_module::Bool=true
 end
 
-function (formatter::BasicLogFormatter)(io::IO, args::NamedTuple)
+function (formatter::BasicLogFormatter)(io::IO, log::NamedTuple)
     if formatter.include_module
-        print(io, args._module, " | ")
+        print(io, log._module, " | ")
     end
-    println(io, "[", args.level, "] ", args.message)
+    println(io, "[", log.level, "] ", log.message)
 end
 
 @testset "FormatLogger" begin
     io = IOBuffer()
-    logger = FormatLogger(io) do io, args
+    logger = FormatLogger(io) do io, log
         # Put in some bogus sleep calls just to test that
         # log records writes in one go
-        print(io, args.level)
+        print(io, log.level)
         sleep(rand())
         print(io, ": ")
         sleep(rand())
-        println(io, args.message)
+        println(io, log.message)
     end
     with_logger(logger) do
         @sync begin
@@ -242,7 +242,7 @@ end
     mktempdir() do dir
         f = joinpath(dir, "test.log")
 
-        logger = FormatLogger(f) do io, args
+        logger = FormatLogger(f) do io, log
             println(io, "log message")
         end
 
