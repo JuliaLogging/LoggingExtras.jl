@@ -8,10 +8,11 @@ end
     FormatLogger(formatter, io::IO=stderr; always_flush=true)
 
 Logger sink that formats the message and finally writes to `io`.
-The formatting function should be of the form `formatter(io::IOContext, log::NamedTuple)`
-where `log` has the following fields:
+The formatting function or callable object should be of the form
+`formatter(io::IOContext, log::NamedTuple)` where `log` has the following fields:
 `(level, message, _module, group, id, file, line, kwargs)`.
-See [`LoggingExtras.handle_message_args`](@ref) for more information on what field is.
+
+See [`LoggingExtras.handle_message_args`](@ref) for more information on what each field is.
 
 # Examples
 ```julia-repl
@@ -36,8 +37,8 @@ end
 """
     FormatLogger(formatter, path::AbstractString; append=false, always_flush=true)
 
-Logger sink that formats the message and writes it to the file at `path`.  This is similar
-to `FileLogger` except that it allows specifying the printing format.
+Logger sink that formats the message and writes it to the file at `path`. This is similar
+to [`FileLogger`](@ref) except that it allows specifying the printing format.
 
 To append to the file (rather than truncating the file first), use `append=true`.
 If `always_flush=true` the stream is flushed after every handled log message.

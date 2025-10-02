@@ -197,7 +197,7 @@ end
     end
 end
 
-# NOTE: this intentionally does not subtype Function
+# Intentionally not subtype `Function` here to test function-like object support
 Base.@kwdef struct BasicLogFormatter
     include_module::Bool=true
 end
