@@ -62,12 +62,3 @@ end
 shouldlog(logger::FormatLogger, arg...) = true
 min_enabled_level(logger::FormatLogger) = BelowMinLevel
 catch_exceptions(logger::FormatLogger) = true # Or false? SimpleLogger doesn't, ConsoleLogger does.
-
-# For backwards compatibility
-function Base.getproperty(logger::FormatLogger, f::Symbol)
-    return if f === :f
-        getfield(logger, :formatter)
-    else
-        getfield(logger, f)
-    end
-end

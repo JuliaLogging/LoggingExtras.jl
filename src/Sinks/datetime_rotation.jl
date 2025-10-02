@@ -71,7 +71,7 @@ function DatetimeRotatingFileLogger(f::Union{Function,Nothing}, dir, filename_pa
 end
 
 similar_logger(::SimpleLogger, io) = SimpleLogger(io, BelowMinLevel)
-similar_logger(l::FormatLogger, io) = FormatLogger(l.f, io, l.always_flush)
+similar_logger(l::FormatLogger, io) = FormatLogger(l.formatter, io, l.always_flush)
 function reopen!(drfl::DatetimeRotatingFileLogger)
     if drfl.current_file !== nothing
         # close the old IOStream and pass the file to the callback
