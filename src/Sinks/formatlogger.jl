@@ -1,6 +1,5 @@
-
-struct FormatLogger <: AbstractLogger
-    formatter
+struct FormatLogger{T} <: AbstractLogger
+    formatter::T
     stream::IO
     always_flush::Bool
 end
