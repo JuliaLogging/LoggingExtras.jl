@@ -197,16 +197,28 @@ end
     end
 end
 
+# Intentionally not subtype `Function` here to test function-like object support
+Base.@kwdef struct BasicLogFormatter
+    include_module::Bool=true
+end
+
+function (formatter::BasicLogFormatter)(io::IO, log::NamedTuple)
+    if formatter.include_module
+        print(io, log._module, " | ")
+    end
+    println(io, "[", log.level, "] ", log.message)
+end
+
 @testset "FormatLogger" begin
     io = IOBuffer()
-    logger = FormatLogger(io) do io, args
+    logger = FormatLogger(io) do io, log
         # Put in some bogus sleep calls just to test that
         # log records writes in one go
-        print(io, args.level)
+        print(io, log.level)
         sleep(rand())
         print(io, ": ")
         sleep(rand())
-        println(io, args.message)
+        println(io, log.message)
     end
     with_logger(logger) do
         @sync begin
@@ -231,7 +243,7 @@ end
     mktempdir() do dir
         f = joinpath(dir, "test.log")
 
-        logger = FormatLogger(f) do io, args
+        logger = FormatLogger(f) do io, log
             println(io, "log message")
         end
 
@@ -242,6 +254,21 @@ end
         l = read(f, String)
         @test startswith(l, "log message")
     end
+
+    # test function-like objects/functor are supported
+    io = IOBuffer()
+    with_logger(FormatLogger(BasicLogFormatter(; include_module=true), io)) do
+        @info "test message"
+    end
+    str = String(take!(io))
+    @test str == "$(@__MODULE__()) | [Info] test message\n"
+
+    io = IOBuffer()
+    with_logger(FormatLogger(BasicLogFormatter(; include_module=false), io)) do
+        @warn "test message"
+    end
+    str = String(take!(io))
+    @test str == "[Warn] test message\n"
 end
 
 @testset "LevelOverrideLogger" begin
